@@ -1,0 +1,972 @@
+{% extends 'account/main.html' %}
+{% block content %}
+
+<link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.11.0.css">
+<script src="http://code.jquery.com/qunit/qunit-1.11.0.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+
+
+
+<style>
+    body {/*from  w w w. j a v a2s .c  o m*/
+      font-family: Verdana;
+      font-size: small;
+    }
+    canvas {
+      cursor: pointer;
+      border: 1px solid black;
+    }
+
+    #sliders {
+        width: 80%;
+        padding: 0 10% 0 10%;
+    }
+    #sliders a {
+        font-size: 90%;
+        text-decoration: none;
+    }
+    #container {
+        min-width: 400px;
+        height: 400px;
+        margin: 0 auto;
+    }
+    text[text-anchor=end] {
+        display:none
+    }
+    
+    </style>
+<script>
+    
+
+(function(circleIntersection) {
+    "use strict";
+    var SMALL = 1e-10;
+
+    /** Returns the intersection area of a bunch of circles (where each circle
+     is an object having an x,y and radius property) */
+    circleIntersection.intersectionArea = function(circles, stats) {
+        // get all the intersection points of the circles
+        var intersectionPoints = circleIntersection.getIntersectionPoints(circles);
+        
+        // filter out points that aren't included in all the circles
+        var innerPoints = intersectionPoints.filter(function (p) {
+            return circleIntersection.containedInCircles(p, circles);
+        });
+
+        var arcArea = 0, polygonArea = 0, arcs = [], i;
+
+        // if we have intersection points that are within all the circles,
+        // then figure out the area contained by them
+        if (innerPoints.length > 1) {
+            // sort the points by angle from the center of the polygon, which lets
+            // us just iterate over points to get the edges
+            var center = circleIntersection.getCenter(innerPoints);
+            for (i = 0; i < innerPoints.length; ++i ) {
+                var p = innerPoints[i];
+                p.angle = Math.atan2(p.x - center.x, p.y - center.y);
+            }
+            innerPoints.sort(function(a,b) { return b.angle - a.angle;});
+
+            // iterate over all points, get arc between the points
+            // and update the areas
+            var p2 = innerPoints[innerPoints.length - 1];
+            for (i = 0; i < innerPoints.length; ++i) {
+                var p1 = innerPoints[i];
+
+                // polygon area updates easily ...
+                polygonArea += (p2.x + p1.x) * (p1.y - p2.y);
+    
+                // updating the arc area is a little more involved
+                var midPoint = {x : (p1.x + p2.x) / 2,
+                                y : (p1.y + p2.y) / 2},
+                    arc = null;
+
+                for (var j = 0; j < p1.parentIndex.length; ++j) {
+                    if (p2.parentIndex.indexOf(p1.parentIndex[j]) > -1) {
+                        // figure out the angle halfway between the two points
+                        // on the current circle
+                        var circle = circles[p1.parentIndex[j]],
+                            a1 = Math.atan2(p1.x - circle.x, p1.y - circle.y),
+                            a2 = Math.atan2(p2.x - circle.x, p2.y - circle.y);
+
+                        var angleDiff = (a2 - a1);
+                        if (angleDiff < 0) {
+                            angleDiff += 2*Math.PI;
+                        }
+                        
+                        // and use that angle to figure out the width of the
+                        // arc
+                        var a = a2 - angleDiff/2,
+                            width = circleIntersection.distance(midPoint, {
+                                x : circle.x + circle.radius * Math.sin(a),
+                                y : circle.y + circle.radius * Math.cos(a)
+                            });
+                        
+                        // pick the circle whose arc has the smallest width
+                        if ((arc === null) || (arc.width > width)) {
+                            arc = { circle : circle,    
+                                    width : width,
+                                    p1 : p1,
+                                    p2 : p2};
+                        }
+                    }
+                }
+                arcs.push(arc);
+                arcArea += circleIntersection.circleArea(arc.circle.radius, arc.width);
+                p2 = p1;
+            }
+        } else {
+            // no intersection points, is either disjoint - or is completely
+            // overlapped. figure out which by examining the smallest circle
+            var smallest = circles[0];
+            for (i = 1; i < circles.length; ++i) {
+                if (circles[i].radius < smallest.radius) {
+                    smallest = circles[i];
+                }
+            }
+           
+            // make sure the smallest circle is completely contained in all
+            // the other circles
+            var disjoint = false;
+            for (i = 0; i < circles.length; ++i) {
+                if (circleIntersection.distance(circles[i], smallest) > Math.abs(smallest.radius - circles[i].radius)) {
+                    disjoint = true;
+                    break;
+                }
+            }
+
+            if (disjoint) {
+                arcArea = polygonArea = 0;
+
+            } else {
+                arcArea = smallest.radius * smallest.radius * Math.PI;
+                arcs.push({circle : smallest,
+                           p1: { x: smallest.x,        y : smallest.y + smallest.radius},
+                           p2: { x: smallest.x - SMALL, y : smallest.y + smallest.radius},
+                           width : smallest.radius * 2 });
+            }
+        }
+
+        polygonArea /= 2;
+        if (stats) {
+            stats.area = arcArea + polygonArea;
+            stats.arcArea = arcArea;
+            stats.polygonArea = polygonArea;
+            stats.arcs = arcs;
+            stats.innerPoints = innerPoints;
+            stats.intersectionPoints = intersectionPoints;
+        }
+
+        return arcArea + polygonArea;
+    };
+
+    /** returns a monte carlo estimate of the overlap of a bunch of circles
+     much simpler method than the one above, but slower and less accurate */
+    circleIntersection.monteCarloEstimate = function(circles, count) {
+        count = count || 10000;
+        var contained = 0;
+        var bound = circleIntersection.getBoundingRectangle(circles);
+        for (var i = 0; i < count; ++i) {
+            var p = circleIntersection.randomPoint(bound);
+            if (circleIntersection.containedInCircles(p, circles)) {
+                contained++;
+            }
+        }
+        return bound.width * bound.height * contained / count;
+    };
+   
+    circleIntersection.subdivideRectangle = function(current, output) {
+        var w = current.width/2,
+            h = current.height/2,
+            level = current.level || 0;
+
+        output({ x: current.x,
+                 y : current.y,
+                 width : w,
+                 height: h,
+                 level : level + 1});
+
+        output({ x: current.x + w,
+                 y : current.y,
+                 width : w,
+                 height: h,
+                 level : level + 1});
+
+        output({ x: current.x,
+                 y : current.y + h,
+                 width : w,
+                 height: h,
+                 level : level + 1});
+
+        output({ x: current.x + w,
+                 y : current.y + h,
+                 width : w,
+                 height: h,
+                 level : level + 1});
+    }
+
+    circleIntersection.rectangleContained = function(current, circles) {
+        var x = current.x, y = current.y, w = current.width, h = current.height;
+
+        var pointValues = [
+            circleIntersection.containedInCircles({x:x, y:y} , circles),
+            circleIntersection.containedInCircles({x:x+w, y:y} , circles),
+            circleIntersection.containedInCircles({x:x, y:y+h} , circles),
+            circleIntersection.containedInCircles({x:x+w, y:y+h}, circles)];
+
+        for (var i = 1; i < pointValues.length; ++i) {
+            if (pointValues[i] !== pointValues[0]) {
+                return 0;
+            }
+        }
+
+        return pointValues[0] ? 1 : -1;
+    }
+ 
+        
+    circleIntersection.quadtreeEstimate = function(circles, depth) {
+        var bound = circleIntersection.getBoundingRectangle(circles),
+            area = 0, outsideArea = 0;
+
+        if (bound.widh <= 0 || bound.height <= 0) {
+            return [0,0];
+        }
+
+        depth = depth || 8;
+        
+        function examineRectangle(r) {
+            var inOrOut = circleIntersection.rectangleContained(r, circles);
+            if (inOrOut === 0) {
+                if (r.level <= depth) {
+                    circleIntersection.subdivideRectangle(r, examineRectangle);
+                }
+            } else if (inOrOut > 0) {
+                area += r.width * r.height;
+            } else {
+                outsideArea += r.width * r.height;
+            }
+        }
+
+        bound.level = 0;
+        circleIntersection.subdivideRectangle(bound, examineRectangle);
+
+        var uncertain = (bound.width * bound.height - area - outsideArea)/2;
+        return [area + uncertain, uncertain];
+    };
+
+    /** returns whether a point is contained by all of a list of circles */
+    circleIntersection.containedInCircles = function(point, circles) {
+        for (var i = 0; i < circles.length; ++i) {
+            if (circleIntersection.distance(point, circles[i]) > circles[i].radius + SMALL) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    /** Gets all intersection points between a bunch of circles */
+    circleIntersection.getIntersectionPoints = function(circles) {
+        var ret = [];
+        for (var i = 0; i < circles.length; ++i) {
+            for (var j = i + 1; j < circles.length; ++j) {
+                var intersect = circleIntersection.circleCircleIntersection(circles[i],
+                                                              circles[j]);
+                for (var k = 0; k < intersect.length; ++k) {
+                    var p = intersect[k];
+                    p.parentIndex = [i,j];
+                    ret.push(p);
+                }
+            }
+        }
+        return ret;
+    }
+
+    circleIntersection.circleIntegral = function(r, x) {
+        var y = Math.sqrt(r * r - x * x);
+        return x * y + r * r * Math.atan2(x, y);
+    };
+
+    /** Returns the area of a circle of radius r - up to width */
+    circleIntersection.circleArea = function(r, width) {
+        return circleIntersection.circleIntegral(r, width - r) - circleIntersection.circleIntegral(r, -r);
+    };
+
+
+    /** euclidean distance between two points */
+    circleIntersection.distance = function(p1, p2) {
+        return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) +
+                         (p1.y - p2.y) * (p1.y - p2.y));
+    };
+
+
+    /** Returns the overlap area of two circles of radius r1 and r2 - that
+    have their centers separated by distance d. Simpler faster
+    circle intersection for only two circles */
+    circleIntersection.circleOverlap = function(r1, r2, d) {
+        // no overlap
+        if (d >= r1 + r2) {
+            return 0;
+        }
+
+        // completly overlapped
+        if (d <= Math.abs(r1 - r2)) {
+            return Math.PI * Math.min(r1, r2) * Math.min(r1, r2);
+        }
+
+        var w1 = r1 - (d * d - r2 * r2 + r1 * r1) / (2 * d),
+            w2 = r2 - (d * d - r1 * r1 + r2 * r2) / (2 * d);
+        return circleIntersection.circleArea(r1, w1) + circleIntersection.circleArea(r2, w2);
+    };
+
+
+    /** Given two circles (containing a x/y/radius attributes),
+    returns the intersecting points if possible.
+    note: doesn't handle cases where there are infinitely many
+    intersection poiints (circles are equivalent):, or only one intersection point*/
+    circleIntersection.circleCircleIntersection = function(p1, p2) {
+        var d = circleIntersection.distance(p1, p2),
+            r1 = p1.radius,
+            r2 = p2.radius;
+
+        // if to far away, or self contained - can't be done
+        if ((d >= (r1 + r2)) || (d <= Math.abs(r1 - r2))) {
+            return [];
+        }
+
+        var a = (r1 * r1 - r2 * r2 + d * d) / (2 * d),
+            h = Math.sqrt(r1 * r1 - a * a),
+            x0 = p1.x + a * (p2.x - p1.x) / d,
+            y0 = p1.y + a * (p2.y - p1.y) / d,
+            rx = -(p2.y - p1.y) * (h / d),
+            ry = -(p2.x - p1.x) * (h / d);
+
+        return [{ x: x0 + rx, y : y0 - ry },
+                { x: x0 - rx, y : y0 + ry }];
+    };
+
+    /** Returns the center of a bunch of points */
+    circleIntersection.getCenter = function(points) {
+        var center = { x: 0, y: 0};
+        for (var i =0; i < points.length; ++i ) {
+            center.x += points[i].x;
+            center.y += points[i].y;
+        }
+        center.x /= points.length;
+        center.y /= points.length;
+        return center;
+    };
+
+    circleIntersection.randomPoint = function(rect) {
+        return { x: rect.x + Math.random() * rect.width,
+                 y: rect.y + Math.random() * rect.height};
+    };
+
+    circleIntersection.getBoundingRectangle = function(circles) {
+        function contained(p) {
+            return circleIntersection.containedInCircles(p, circles); 
+        } 
+        var intersectionPoints = circleIntersection.getIntersectionPoints(circles);
+        var inner = intersectionPoints.filter(contained);
+
+        var x1 = Math.min.apply(null, inner.map(function (p) { return p.x; })),
+            y1 = Math.min.apply(null, inner.map(function (p) { return p.y; })),
+            x2 = Math.max.apply(null, inner.map(function (p) { return p.x; })),
+            y2 = Math.max.apply(null, inner.map(function (p) { return p.y; }));
+        
+        for (var i = 0; i < circles.length; ++i) {
+            var p = circles[i];
+            if ((p.x - p.radius < x1) && (contained({x: p.x - p.radius, y:p.y}))) {
+                x1 = p.x - p.radius
+            }
+            if ((p.x + p.radius > x2) && (contained({x:p.x + p.radius, y:p.y}))) {
+                x2 = p.x + p.radius
+            }
+            if ((p.y - p.radius < y1) && (contained({y: p.y - p.radius, x:p.x}))) {
+                y1 = p.y - p.radius
+            }
+            if ((p.y + p.radius > y2) && (contained({y:p.y + p.radius, x:p.x}))) {
+                y2 = p.y + p.radius
+            }
+        }
+
+        return { x: x1, y : y1, height : y2 - y1, width : x2 - x1};
+    };
+}(window.circleIntersection = window.circleIntersection || {}));
+
+
+</script>
+      <script>
+    // This function stores the details for a single circle.
+    function Circle(id, x, y, radius, color, area, row) {
+      this.id = id;
+      this.x = x;
+      this.y = y;
+      this.radius = radius;
+      this.color = color;
+      this.area = area;
+      this.isSelected = false;
+      this.row = row
+    }
+    
+    // This array hold all the circles on the canvas.
+    let circles = [];
+    let idCounter = 0;
+    let canvas;
+    let context;
+    let canvasArea = 0;
+    let untouchedCanvasArea = 0;
+    let untouchedCanvasAreaPercentage = 100;
+    let overlaps = []
+    
+    let multipleOverlapCircles = [];
+    let multipleOverlapCirclesArea = 0;
+    
+    this.selectedCircle;
+    
+    var numberOfHorizontalCircles = 3;
+    var numberOfVerticalCircles = 2;
+    var numberOfSections = numberOfHorizontalCircles * numberOfVerticalCircles;
+    var width = 528;
+    var height = 264;
+    var R = Math.sqrt(((width * height) / numberOfSections))/2
+    var R = 30
+    
+    console.log("Radius: ", R);
+    
+    window.onload = function() {
+        this.init();
+    };
+    
+    function init(){
+    
+      canvas = document.getElementById("canvas");
+      
+      context = canvas.getContext("2d");
+      context.clearRect(0, 0, 528, 264);
+      circles = [];
+      canvasArea = canvas.height * canvas.width;
+      untouchedCanvasArea = canvasArea;
+      canvas.onmousedown = canvasClick;
+      canvas.onmouseup = stopDragging;
+      canvas.onmouseout = stopDragging;
+      canvas.onmousemove = dragCircle;
+      console.log("Total Area: ", canvasArea);
+      console.log("Untouched Area: ", untouchedCanvasArea);
+    
+        var MX = numberOfHorizontalCircles // max amount of sqares that can fit on the width
+        var MY = numberOfVerticalCircles; // max amount of sqares that can fit on the height
+        var skipLast = 0;
+        var numOfCalculatedCircles = MX*MY;
+        if(numOfCalculatedCircles != numberOfSections) {
+            
+            if(numOfCalculatedCircles < numberOfSections) {
+                console.log('numOfCalculatedCircles',numOfCalculatedCircles);
+                MX = MX + Math.ceil((numberOfSections - numOfCalculatedCircles)/MY);
+                if(MX*MY != numberOfSections) {
+                    skipLast = Math.abs(MX*MY - numberOfSections);
+                }
+            } else {
+                skipLast = numOfCalculatedCircles - numberOfSections;;
+            }
+            
+        }
+        // recalculate the radius for X
+         if (R * 2 * MX > width) {
+             R = (width/2) / MX;
+         }
+    
+        // recalculate the radius for Y
+         if (R * 2 * MY > height) {
+             R = (height/2) / MY
+         }
+    
+        var circlesWidth = R * 2 * MX;
+        var circlesHeight = R * 2 * MY;
+    
+        //console.log(circlesWidth, circlesHeight);
+        var marginX = 0;
+        var marginY = 0;
+        if (circlesWidth < width) {
+            marginX = (width - circlesWidth) / 2
+        }
+        if (circlesHeight < height) {
+            marginY = (height - circlesHeight) / 2
+        }
+        //console.log(marginX, marginY);
+    
+        var centers = [];
+        var RY = marginY + R;
+    
+        for (var i = 0; i < MY; i++) {
+            var RX = marginX + R;
+            for (var j = 0; j < MX; j++) {
+                if(i === MY - 1) {
+                    if(j === MX - skipLast) {
+                        break;
+                    }
+                }
+                centers.push({
+                    x: RX,
+                    y: RY
+                });
+                addRandomCircle(RX, RY, R, i)
+                RX += 2 * R;
+            }
+    
+            RY += 2 * R;
+        }
+    }
+    
+    
+    function addRandomCircle(RX, RY, R, i) {
+      idCounter += 1;
+      let radius =  R;
+      let x = RX;
+      let y = RY;
+    
+      let color = "#E2E9FB";
+    
+      let circle = new Circle(idCounter, x, y, radius, color, parseInt(radius * radius * 3.14,10), i+1);
+      
+      for(let i=0; i<circles.length; i++) {
+        let circleExist = circles[i];
+        if (circleIntersect(circleExist.x, circleExist.y, circleExist.radius, circle.x, circle.y, circle.radius)) {
+            if(circleExist.id > circle.id){
+                overlaps[circle.id + "-" + circleExist.id] = intersectionArea(circleExist.x, circleExist.y, circleExist.radius, circle.x, circle.y, circle.radius)
+            } else {
+                overlaps[circleExist.id + "-" + circle.id] = intersectionArea(circleExist.x, circleExist.y, circleExist.radius, circle.x, circle.y, circle.radius)
+            }
+        }
+      }  
+    
+      
+      circles.push(circle);
+      calculateUntouchedArea();
+      
+      drawCircles();
+    }
+    
+    function clearCanvas() {
+      circles = [];
+      
+      drawCircles();
+    }
+    
+    function drawCircles() {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+    
+      let evenCounter = 2;
+      let oddCounter = evenCounter+1;
+    
+      for(let i=0; i<circles.length; i++) {
+    
+    
+        let circle = circles[i];
+    
+        context.globalAlpha = 0.25;
+        context.beginPath();
+        context.arc(circle.x, circle.y, circle.radius, 0, Math.PI*2);
+        
+        context.fillStyle = circle.color;
+        context.strokeStyle = "black";
+    
+        if (circle.isSelected) {
+          context.lineWidth = 3;
+        }
+        else {
+          context.lineWidth = 1;
+        }
+        context.fill();
+        context.stroke(); 
+    
+        context.globalAlpha = 0.85;
+        context.beginPath();
+        context.arc(circle.x, circle.y, 8, 0, Math.PI*2);
+        
+        context.fillStyle = "Green";
+        //context.strokeStyle = "black";
+        context.fill();
+        //context.stroke(); 
+    
+        context.beginPath();
+    
+    
+        let text = "";
+    
+        if( circle.row == 1){
+            text += evenCounter + "HWCA";
+            evenCounter+=2;
+        } else {
+            text += oddCounter + "HWCB";
+            oddCounter+=2;
+        }
+       
+        context.font = '7pt Arial';
+        context.fillStyle = 'black';
+        context.textAlign = 'center';
+        context.fillText(text, circle.x, circle.y-13);
+        
+      }
+      
+    }
+    
+    function detactOverlap(){
+        //console.log("previousSelectedCircle", previousSelectedCircle)
+        
+        if (previousSelectedCircle && previousSelectedCircle.isSelected) {
+            for(let i=0; i<circles.length; i++) {
+                if(previousSelectedCircle.id == circles[i].id){
+                    // let circle = circles[i];
+                    // context.globalAlpha = 0.85;
+                    // context.beginPath();
+                    // context.arc(circle.x, circle.y, circle.radius, 0, Math.PI*2);
+                    // context.fillStyle = circle.color;
+                    // context.strokeStyle = "red";
+                    // context.fill();
+                    // context.stroke(); 
+                } else {
+                    let circle = circles[i];
+                    // context.globalAlpha = 0.85;
+                    // context.beginPath();
+                    // context.arc(circle.x, circle.y, circle.radius, 0, Math.PI*2);
+                    // context.fillStyle = circle.color;
+    
+                    if (circleIntersect(previousSelectedCircle.x, previousSelectedCircle.y, previousSelectedCircle.radius, circle.x, circle.y, circle.radius)) {
+                        
+                        // context.strokeStyle = "red";
+                        // console.log("overlapping")
+                        // context.moveTo( previousSelectedCircle.x + previousSelectedCircle.radius, previousSelectedCircle.y );
+                        // context.arc(previousSelectedCircle.x, previousSelectedCircle.y, previousSelectedCircle.radius, 0, Math.PI*2);
+                        // context.fillStyle = previousSelectedCircle.color;
+                        // context.strokeStyle = "red";
+    
+                        //console.log(previousSelectedCircle.id + "-" +   circle.id, intersectionArea(previousSelectedCircle.x, previousSelectedCircle.y, previousSelectedCircle.radius, circle.x, circle.y, circle.radius))
+                        //console.log(previousSelectedCircle.id + "-" +   circle.id, getPercentage(intersectionArea(previousSelectedCircle.x, previousSelectedCircle.y, previousSelectedCircle.radius, circle.x, circle.y, circle.radius), circle.area))
+    
+                        if(previousSelectedCircle.id > circle.id){
+                            overlaps[circle.id + "-" + previousSelectedCircle.id] = intersectionArea(previousSelectedCircle.x, previousSelectedCircle.y, previousSelectedCircle.radius, circle.x, circle.y, circle.radius)
+                        } else {
+                            overlaps[previousSelectedCircle.id + "-" + circle.id] = intersectionArea(previousSelectedCircle.x, previousSelectedCircle.y, previousSelectedCircle.radius, circle.x, circle.y, circle.radius)
+                        }
+                        context.strokeStyle = "red";
+                        calculateUntouchedArea(previousSelectedCircle);
+                    }
+                    else {
+                        if(previousSelectedCircle.id > circle.id){
+                            overlaps[circle.id + "-" + previousSelectedCircle.id] = 0
+                        } else {
+                            overlaps[previousSelectedCircle.id + "-" + circle.id] = 0
+                        }
+                        calculateUntouchedArea(previousSelectedCircle);
+                        //context.strokeStyle = "black";
+                    }
+                   // context.fill();
+                   // context.stroke(); 
+                   
+                }
+            }
+        }
+    }
+    
+    function calculateUntouchedArea(previousSelectedCircle){
+        untouchedCanvasArea = canvasArea;
+        untouchedCanvasAreaPercentage = 100;
+        var circleAreaCovered = 0;
+        for(let i=0; i<circles.length; i++) {
+            let circleExist = circles[i];
+            circleAreaCovered += circleExist.area
+            //console.log("circleExist", circleExist.area);
+        }
+    
+        let overlapArea = 0;
+        for (var key in overlaps) {
+            overlapArea += overlaps[key];
+        }
+    
+        console.log("Hit Area without Overlap: ", circleAreaCovered);
+        
+        if(overlapArea > 0){
+            //console.log("overlaps", overlaps);
+            circleAreaCovered -=  overlapArea;
+        }
+    
+        let circlesNew = [];
+        let ii = 0;
+        
+        for(let k=0; k < numberOfVerticalCircles; k++){    
+            let rowNumber = k+1;
+            if(multipleOverlapCircles.length == 0){
+                multipleOverlapCircles[k] = 0;
+            }
+            for(let i=0; i < circles.length; i++){
+                if (previousSelectedCircle && previousSelectedCircle.isSelected && previousSelectedCircle.row == rowNumber && circles[i].row == rowNumber) {
+                    circlesNew[ii] = circles[i];
+                    ii++;
+                    multipleOverlapCircles[k] = circleIntersection.intersectionArea(circlesNew);
+                }            
+            }
+                
+            
+        }
+    
+        console.log("Overlap Area Adjustment: ", multipleOverlapCircles)
+    
+        let circleOverlapAdjustment = 0;
+        if(multipleOverlapCircles.length > 0){
+            for(let k=0; k < multipleOverlapCircles.length; k++){
+                circleOverlapAdjustment +=  multipleOverlapCircles[k];
+            }
+        }
+    
+        if(circleOverlapAdjustment > 0){
+            circleAreaCovered += circleOverlapAdjustment;
+            console.log("Overlap Area Total Adjustment: ", circleOverlapAdjustment)
+        }
+    
+        
+        console.log("Hit Area: ", circleAreaCovered);
+        if(circleAreaCovered > 0){
+            untouchedCanvasAreaPercentage -= getPercentage(circleAreaCovered, untouchedCanvasArea);
+            untouchedCanvasArea -= circleAreaCovered;
+        }
+    
+        //console.log("canvasArea: ", canvasArea);
+        
+        console.log("Overlap Area: ", overlapArea);
+        
+        console.log("Untouched Area: ", untouchedCanvasArea);
+        console.log("Untouched Area Percentage: ", untouchedCanvasAreaPercentage);
+    }
+    
+    function getPercentage(number, total){
+        return (number/total)*100
+    }
+    
+    function circleIntersect(x0, y0, r0, x1, y1, r1) {
+        return Math.hypot(x0 - x1, y0 - y1) <= r0 + r1;
+    }
+    
+    let previousSelectedCircle;
+    
+    function canvasClick(e) {
+      let clickX = e.pageX - canvas.offsetLeft;
+      let clickY = e.pageY - canvas.offsetTop;
+    
+      for(let i=circles.length-1; i>=0; i--) {
+        let circle = circles[i];
+    
+        let distanceFromCenter = Math.sqrt(Math.pow(circle.x - clickX, 2) + Math.pow(circle.y - clickY, 2))
+        if (distanceFromCenter <= circle.radius) {
+          if (previousSelectedCircle != null) previousSelectedCircle.isSelected = false;
+          previousSelectedCircle = circle;
+          
+          circle.isSelected = true;
+    
+          isDragging = true;
+          this.selectedCircle = circle;
+    
+          drawCircles();
+          return;
+        }
+      }
+    }
+    
+    function intersectionDots(x0, y0, r0, x1, y1, r1) {
+        var a, dx, dy, d, h, rx, ry;
+        var x2, y2;
+        /* dx and dy are the vertical and horizontal distances between the circle centers. */
+        dx = x1 - x0;
+        dy = y1 - y0;
+        /* Determine the straight-line distance between the centers. */
+        d = Math.sqrt((dy*dy) + (dx*dx));
+        /* Check for solvability. */
+        if (d > (r0 + r1)) {
+            /* circles do not intersect. */
+            return false;
+        }
+        if (d < Math.abs(r0 - r1)) {
+            /* one circle is contained in the other */
+            return false;
+        }
+        /* 'point 2' is the point where the line through the circle intersection points crosses the line between the circle centers.  */
+        /* Determine the distance from point 0 to point 2. */
+        a = ((r0*r0) - (r1*r1) + (d*d)) / (2.0 * d) ;
+        /* Determine the coordinates of point 2. */
+        x2 = x0 + (dx * a/d);
+        y2 = y0 + (dy * a/d);
+        /* Determine the distance from point 2 to either of the intersection points. */
+        h = Math.sqrt((r0*r0) - (a*a));
+        /* Now determine the offsets of the intersection points from point 2. */
+        rx = -dy * (h/d);
+        ry = dx * (h/d);
+    
+        /* Determine the absolute intersection points. */
+        var xi = x2 + rx;
+        var xi_prime = x2 - rx;
+        var yi = y2 + ry;
+        var yi_prime = y2 - ry;
+    
+        return [xi, xi_prime, yi, yi_prime];
+    }
+    
+    function intersectionArea (x0, y0, r0, x1, y1, r1) {
+        var rr0 = r0 * r0;
+        var rr1 = r1 * r1;
+        var d = Math.sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
+        // Circles do not overlap
+        if (d > r1 + r0) {return 0;}
+        // Circle1 is completely inside circle0
+        else if (d <= Math.abs(r0 - r1) && r0 >= r1) {return Math.PI * rr1;}
+        // Circle0 is completely inside circle1
+        else if (d <= Math.abs(r0 - r1) && r0 < r1) {return Math.PI * rr0;}
+        // Circles partially overlap
+        else {
+            var phi = (Math.acos((rr0 + (d * d) - rr1) / (2 * r0 * d))) * 2;
+            var theta = (Math.acos((rr1 + (d * d) - rr0) / (2 * r1 * d))) * 2;
+            var area1 = 0.5 * theta * rr1 - 0.5 * rr1 * Math.sin(theta);
+            var area2 = 0.5 * phi * rr0 - 0.5 * rr0 * Math.sin(phi);
+            // Return area of intersection
+            return area1 + area2;
+        }
+    }
+    
+    let isDragging = false;
+    
+    function stopDragging() {
+      isDragging = false;
+    }
+    
+    function dragCircle(e) {
+      if (isDragging == true) {
+        
+        if (previousSelectedCircle != null) {
+          let x = e.pageX - canvas.offsetLeft;
+          //let y = e.pageY - canvas.offsetTop;
+          if(x < R){
+            x = R;
+          }
+    
+          if(x > canvas.width-R){
+            x = canvas.width-R;
+          }
+          previousSelectedCircle.x = x;
+          //previousSelectedCircle.y = y;
+    
+          drawCircles();
+          detactOverlap();
+        }
+      }
+    }
+    
+    
+    function randomFromTo(from, to) {
+      return Math.floor(Math.random() * (to - from + 1) + from);
+    }
+        
+
+    
+        </script>
+    </head>  
+        
+    <body>
+    
+      
+      
+              <div class="col-sm">
+                <canvas id="canvas" width="528" height="264">
+                </canvas>
+                <div>
+                    <button onclick="init()">Clear Canvas</button>
+                  </div>
+            
+              </div>
+            
+                <div id="container"></div>
+                <div id="sliders"></div>
+     
+    <script>
+        $(function () {
+            // Build the chart
+            var chart = new Highcharts.Chart({
+                chart: {
+                    renderTo: 'container',
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    events: {
+                        redraw: function () {
+                            //update sliders   
+                            $.each(chart.series[0].points, function (i, point) {
+                                console.log(point.slider, point);
+                                point.slider.slider('value', point.percentage);
+                            });
+                        }
+                    }
+                },
+                title: {
+                    text: 'Browser market shares at a specific website, 2010'
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage}%</b>',
+                    percentageDecimals: 1
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: false
+                        },
+                        showInLegend: true
+                    }
+                },
+                series: [{
+                    type: 'pie',
+                    name: 'Browser share',
+                    data: [
+                        ['Firefox', 10.0],
+                        ['IE', 10],
+                        ['Chrome', 10],
+                        ['Safari', 10],
+                        ['Opera', 10],
+                        ['Others', 50]
+                    ]
+                }]
+            });
+            var pointsLength = chart.series[0].data.length;
+            $.each(chart.series[0].points, function (i, point) {
+                $('<input type="hidden" name="slider[]">').val(point.y).appendTo('#sliders')
+                point.slider = $('<div></div>').appendTo('#sliders').slider({
+                    value: point.y,
+                    max: 100,
+                    min: 0,
+                    slide: function (event, ui) {
+                        var prevVal = point.y,
+                            step = (ui.value - point.y) / (pointsLength - 1),
+                            data = [],
+                            newVal;
+                        
+                        $.each(chart.series[0].points, function(i, p){
+                            if(p === point) {
+                                data.push({
+                                    name: p.name,
+                                    y: ui.value
+                                })
+                            } else {
+                                data.push({
+                                    name: p.name,
+                                    y: p.y - step
+                                })
+                            }
+                        });
+                        chart.series[0].setData(data);
+                        $(this).prev().val(ui.value)
+                    }
+                })
+                point.slider.children('a').css('background', point.color).text('    ' + point.legendItem.textStr)
+            })
+        });
+    </script> 
+    </body>
+{% endblock content %}
