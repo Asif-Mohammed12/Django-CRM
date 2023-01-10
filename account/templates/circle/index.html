@@ -1,6 +1,8 @@
 {% extends 'account/main.html' %} 
 {% block content %} 
-{% include 'account/status.html' %}
+{% include 'circle/status.html' %}
+{% load static %}
+
 <link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.11.0.css" />
 <script src="http://code.jquery.com/qunit/qunit-1.11.0.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -14,7 +16,9 @@
   canvas {
     cursor: pointer;
     border: 1px solid black;
+    background-color:#fff;
   }
+
 
   h1 {
     margin: auto;
@@ -23,6 +27,31 @@
     padding-top: 30px;
   }
 
+  .dot-overlap  {
+    height: 25px;
+    width: 25px;
+    background-color: #756af2;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .dot-hit {
+    height: 25px;
+    width: 25px;
+    background-color: #F35858;
+    border-radius: 50%;
+    display: inline-block;
+  }
+ 
+  .dot-untouched {
+    height: 25px;
+    width: 25px;
+    background-color: #96DE8B;
+    border-radius: 50%;
+    display: inline-block;
+  }
+ 
+ 
   .flex {
     display: flex;
   }
@@ -44,47 +73,26 @@
   padding: 10px;
   }
 
-  [data-pie-index="0"] {
-    position: relative;
-    border-radius: 50%;
-    box-shadow: inset 0 0 25px 10px #a2caff;
-  }
 
   [data-pie-index="1"] {
     position: relative;
     border-radius: 50%;
     box-shadow: inset 0 0 25px 10px #a2caff;
-  }
-
-  [data-pie-index="2"] {
-    position: relative;
-    border-radius: 50%;
-    box-shadow: inset 0 0 25px 10px #f50057;
-  }
-
- 
-
+  } 
   .list-name ul {
     list-style: none;
- 
+    margin-top:10px;
   }
 
   .list-name ul li{
     text-align: center;
     color: #333;
     font-size: 20px;
+    padding-left: 1em;
+    text-indent: -1em;
   }
   
-  .list-name ul li::before {
-    content: "\2022";
-    color: red;
-    font-weight: bold;
- 
-    
-    font-size: 60px;
-  }
   
-
   @keyframes heart {
     0% {
       transform: scale(1.07);
@@ -96,12 +104,6 @@
       transform: scale(0.8);
     }
   }
-
-  .pie-unit-11 {
-    fill: #f50057;
-    font-size: 1rem;
-  }
- 
 </style>
 <script>
   (function (circleIntersection) {
@@ -565,8 +567,7 @@
 
    var translatePos = {};
    var scale = 1.0;
-   console.log("Radius: ", R);
-   console.log("Radius: ", R);
+   
 
    {% comment %} window.onload = function () {
      this.init();
@@ -586,14 +587,14 @@
      canvas.onmousemove = dragCircle;
      console.log("Total Area: ", canvasArea);
      console.log("Untouched Area: ", untouchedCanvasArea);
-
+     console.log("Radius: ", R);
      var MX = numberOfHorizontalCircles; // max amount of sqares that can fit on the width
      var MY = numberOfVerticalCircles; // max amount of sqares that can fit on the height
      var skipLast = 0;
      var numOfCalculatedCircles = MX * MY;
      if (numOfCalculatedCircles != numberOfSections) {
        if (numOfCalculatedCircles < numberOfSections) {
-         console.log("numOfCalculatedCircles", numOfCalculatedCircles);
+         //console.log("numOfCalculatedCircles", numOfCalculatedCircles);
          MX = MX + Math.ceil((numberOfSections - numOfCalculatedCircles) / MY);
          if (MX * MY != numberOfSections) {
            skipLast = Math.abs(MX * MY - numberOfSections);
@@ -860,7 +861,7 @@
        overlapArea += overlaps[key];
      }
 
-     console.log("Hit Area without Overlap: ", circleAreaCovered);
+     //console.log("Hit Area without Overlap: ", circleAreaCovered);
 
      if (overlapArea > 0) {
        //console.log("overlaps", overlaps);
@@ -890,7 +891,7 @@
        }
      }
 
-     console.log("Overlap Area Adjustment: ", multipleOverlapCircles);
+     //console.log("Overlap Area Adjustment: ", multipleOverlapCircles);
 
      let circleOverlapAdjustment = 0;
      if (multipleOverlapCircles.length > 0) {
@@ -915,20 +916,25 @@
        untouchedCanvasArea -= circleAreaCovered;
      }
 
-     //console.log("canvasArea: ", canvasArea);
+     console.log("test: ", new Intl.NumberFormat('en-US').format(canvasArea));
 
      //console.log("Overlap Area: ", overlapArea);
 
      //console.log("Untouched Area: ", untouchedCanvasArea);
      //console.log("Untouched Area Percentage: ", untouchedCanvasAreaPercentage);
-
-     console.log("Total Area: ", canvasArea);
-     console.log("Hit Area: ", circleAreaCovered.toFixed(2));
+     console.log("Radius: ", R*10);
+     console.log("Total Area: ", canvasArea * 100);
+     console.log("Hit Area: ", (circleAreaCovered * 100).toFixed(0));
      console.log("Hit Area Percentage: ", hitAreaPercentage);
-     console.log("Overlap Area: ", overlapArea.toFixed(2));
+     console.log("Overlap Area: ", overlapArea.toFixed(2)  * 100);
      console.log("Overlap Area Percentage: ", overlapAreaPercentage);
-     console.log("Untouched Area: ", untouchedCanvasArea.toFixed(2));
+     console.log("Untouched Area: ", (untouchedCanvasArea* 100).toFixed(0) );
      console.log("Untouched Area Percentage: ", untouchedCanvasAreaPercentage);
+
+     $( ".lbl-total-area" ).html(new Intl.NumberFormat('en-US').format(canvasArea * 100));
+     $( ".lbl-hit-area" ).html(new Intl.NumberFormat('en-US').format((circleAreaCovered * 100).toFixed(0)));
+     $( ".lbl-overlap-area" ).html(new Intl.NumberFormat('en-US').format((overlapArea * 100).toFixed(0))) ;
+     $( ".lbl-untouched-area" ).html(new Intl.NumberFormat('en-US').format((untouchedCanvasArea* 100).toFixed(0)) );
 
      if(untouched != null){
       untouched.forEach((el, index) => {
@@ -1096,19 +1102,46 @@
      this.init();
      untouched = document.querySelectorAll(".untouched");
      hit = document.querySelectorAll(".hit");
-     overlap = document.querySelectorAll(".overlap");
+     overlap = document.querySelectorAll(".overlap");  
 
-     console.log("untouched",untouched);
-     console.log("hit",hit);
-     console.log("overlap",overlap);
      // start the animation when the element is in the page view
-     untouchedcircle = new CircularProgressBar("untouched");
+
+     const untouchedConfig = {
+      size: 150,
+      speed: 30,
+      animationSmooth: "1s ease-out",
+      strokeBottom: 5,
+      colorSlice: "#96DE8B",
+      colorCircle: "#F35858",
+      round: true
+    };
+     untouchedcircle = new CircularProgressBar("untouched",untouchedConfig);
      untouchedcircle.initial();
 
-     hitcircle = new CircularProgressBar("hit");
+     const hitcircleConfig = {
+      size: 150,
+      speed: 30,
+      animationSmooth: "1s ease-out",
+      strokeBottom: 5,
+      colorSlice: "#F35858",
+      colorCircle: "#96DE8B",
+      round: true
+    };
+     hitcircle = new CircularProgressBar("hit",hitcircleConfig);
      hitcircle.initial();
+    
+     const overlapcircleConfig = {
+      size: 150,
+      speed: 30,
+      animationSmooth: "1s ease-out",
+      strokeBottom: 5,
+      colorSlice: "#756af2",
+      colorCircle: "#f1f1f1",
+      round: true,
+    
+    };
 
-     overlapcircle = new CircularProgressBar("overlap");
+     overlapcircle = new CircularProgressBar("overlap",overlapcircleConfig);
      overlapcircle.initial();
      
 
@@ -1119,6 +1152,8 @@
         };
         untouchedcircle.animationTo(options);
       });
+
+      
 
       hit.forEach((el, index) => {
       const options = {
@@ -1139,39 +1174,38 @@
    });
 </script>
 <body>
-  <div class="container">
-    <div class="row">
-      
-      <div class="col-md-5">
-        <canvas id="canvas" width="528" height="264"></canvas>
+<div class="container">
+  <div class="row">
+    
+      <div class="col-md-6">
+       
+        <canvas id="canvas" width="528" height="264" ></canvas>
+
+ 
       </div>
-      <div class="col-md-7">
+    
+    
+      <div class="col-md-6">
+        <div class="card h-600"> 
         <div class="container" style="display:flex">
-          <section class="list-name" color="#f1f1f1">
-            <div
-              class="untouched"
-              data-pie='{ "percent": 0, "fontWeight": 100 }'
-            ></div>
-            <ul><li>Untouched</li><ul>
+          <section class="list-name">
+            <div class="untouched" data-pie='{ "percent": 0, "fontWeight": 100 }'></div>
+                <div class="mt-5 text-center"><h3><span class="dot-untouched"></span> Untouched</h3></div>
           </section>
           <section class="list-name">
-            <div
-              class="hit"
-              data-pie='{ "percent": 0}'
-            ></div>
-            <ul><li>Hit</li><ul>
+            <div class="hit" data-pie='{ "percent": 0}' ></div>
+              <div class="mt-5 text-center"><h3><span class="dot-hit"></span> Hit</h3></div>
           </section>
           <section class="list-name">
-            <div
-              class="overlap"
-              data-pie='{ "percent": 0, "fontWeight": 100 }'
-            ></div>
-            <ul><li>Overlap</li><ul>
+            <div class="overlap" data-pie='{ "percent": 0, "fontWeight": 100 }'></div>
+            <div class="mt-5 text-center"><h3><span class="dot-overlap"></span> Untouched</h3></div>
           </section>
         </div>
-     
-    </div>
+      </div>
+      </div>
+    
   </div>
-  {% include 'account/eclipse.html' %}
+</div>
+  {% include 'circle/eclipse.html' %}
 </body>
 {% endblock content %}

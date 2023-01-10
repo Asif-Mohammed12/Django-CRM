@@ -27,6 +27,7 @@
 body{
     font-family: 'Inter', sans-serif;
     background-color: #ebeff5;
+    /* background-color: red; */
 }
 
 a {
@@ -189,20 +190,27 @@ canvas {
 
 
 .contentTotal{
-    border-left: 5px solid #FF952D;
+    background: #FFFFFF;
+    box-shadow: 0px 4px 4px rgba(22, 22, 17, 0.05), -7px 0px 0px #FF952D;
+    border-radius: 16px;
 }
 .contentHit{
-    border-left: 5px solid #E94F99;
+   
+    background: #FFFFFF;
+    box-shadow: 0px 4px 4px rgba(22, 22, 17, 0.05), -7px 0px 0px #f35858;
+    border-radius: 16px;
 }
 .contentOverlap{
-    border-left: 5px solid #2195F2;
+    background: #FFFFFF;
+    box-shadow: 0px 4px 4px rgba(22, 22, 17, 0.05), -7px 0px 0px #756af2;
+    border-radius: 16px;
+    
 }
 .contentUntouched{
-    border-left: 5px solid #6F6AF8;
+    background: #FFFFFF;
+    box-shadow: 0px 4px 4px rgba(22, 22, 17, 0.05), -7px 0px 0px #96de8b;
+    border-radius: 16px;
 }
-
-
-
 
 .Area{
     font-size: 20px;
@@ -242,7 +250,7 @@ canvas {
     margin-top: 20px;
 }
 .Overlap{
-    color: #2195F2;
+    color: #756af2;
     font-size: 20px;
 }
 .UntouchedAreaimg{
@@ -250,7 +258,7 @@ canvas {
     margin-top: 20px;
 }
 .Untouched{
-    color: #6F6AF8;
+    color: #96DE8B;
     font-size: 20px;
 }
 
@@ -277,12 +285,7 @@ canvas {
 
 }
 
-.card {
-   
-    padding: 15px;
- 
-   margin-top: 8px;
-  }
+
  .Fracp{
     font-size: 14px;
     color: #131313;
@@ -332,7 +335,7 @@ canvas {
 
 .mask .fill {
   clip: rect(0px, 75px, 150px, 0px);
-  background-color: #2195F2;
+  background-color: #756af2;
 }
 
 .mask .fill1 {
