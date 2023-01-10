@@ -1,54 +1,39 @@
-<br>
-<div class="container">
-<div class="row">
-	<div class="col">
-		<div class="col-md">
-			<div class="card text-center text-white  mb-3" id="total-orders">
-			  	<div class="card-header">
-			  		<h5 class="card-title">Total Orders</h5>
-			  	</div>
-			  	<div class="card-body">
-			    	<h3 class="card-title">{{ total_orders }}</h3>
-			  	</div>
-			</div>
-		</div>
-	</div>
-	<div class="col">
-		<div class="col-md">
-			<div class="card text-center text-white  mb-3" id="orders-delivered">
-			  	<div class="card-header">
-			  		<h5 class="card-title">Out for Delivery</h5>
-			  	</div>
-			  	<div class="card-body">
-			    	<h3 class="card-title">{{ out }}</h3>
-			  	</div>
-			</div>
-		</div>
-	</div>
-	<div class="col">
-		<div class="col-md">
-			<div class="card text-center text-white  mb-3" id="orders-delivered">
-			  	<div class="card-header">
-			  		<h5 class="card-title">Orders Delivered</h5>
-			  	</div>
-			  	<div class="card-body">
-			    	<h3 class="card-title">{{ delivered }}</h3>
-			  	</div>
-			</div>
-		</div>
-	</div>
+{% load static %}
 
-	<div class="col">
-		<div class="col-md">
-			<div class="card text-center text-white  mb-3" id="orders-pending">
-			  	<div class="card-header">
-			  		<h5 class="card-title">Orders Pending</h5>
-			  	</div>
-			  	<div class="card-body">
-			    	<h3 class="card-title">{{ pending }}</h3>
-			  	</div>
-			</div>
-		</div>
-	</div>
-</div>
+<div class="custom-container">
+  <div class="row">
+    <div class="col-sm">
+      <div class="content main-card-reading  contentTotal">
+        <h6 class="Area mt-3">Total Area</h6>
+        <p class="Total">13,939,200 <span class="sq"> sq ft</span></p>
+        <img src="{% static "images/total-area.png" %}"  alt="about-img"
+        class="TotalAreaimg img-float ">
+      </div>
+    </div>
+    <div class="col-sm">
+      <div class="content main-card-reading contentHit">
+        <h6 class="Area mt-3">Hit Area</h6>
+        <p class="Hit">5652 <span class="sq"> sq ft</span></p>
+        <img src="{% static "images/hit-area.png" %}" alt="about-img" class="
+        HitAreaimg img-float ">
+      </div>
+    </div>
+    <div class="col-sm">
+      <div class="content main-card-reading contentOverlap">
+        <h6 class="Area mt-3">Overlap Area</h6>
+        <p class="Overlap">12345 <span class="sq"> sq ft</span></p>
+        <img src="{% static "images/overlap-area.png" %}" alt="about-img"
+        class=" OverlapAreaimg img-float ">
+      </div>
+    </div>
+
+    <div class="col-sm">
+      <div class="content main-card-reading  contentUntouched">
+        <h6 class="Area mt-3">Untouched Area</h6>
+        <p class="Untouched">5534.89 <span class="sq"> sq ft</span></p>
+        <img src="{% static "images/untouched-area.png" %}" alt="about-img"
+        class="UntouchedAreaimg img-float ">
+      </div>
+    </div>
+  </div>
 </div>

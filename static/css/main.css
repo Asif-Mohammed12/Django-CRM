@@ -3,7 +3,7 @@
 :root {
     --header-height: 3rem;
     --nav-width: 68px;
-    --first-color: #8C0014;
+    --first-color: #1a4567;
     --first-color-light: #afa5d9;
     --white-color: #f7f6fb;
     --body-font: "Nunito", sans-serif;
@@ -23,12 +23,17 @@
     font-size: var(--normal-font-size);
     transition: 0.5s;
 } */
-a {
-    text-decoration: none;
-}
+
 body{
+    font-family: 'Inter', sans-serif;
     background-color: #ebeff5;
 }
+
+a {
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+}
+
 
 #total-orders{
     background-color: #97192b;
@@ -44,7 +49,7 @@ body{
 }
 
 .btn-custom-primary{
-    background-color: #8C0014;
+    background-color: #1a4567;
     color: #fff;
    
 }
@@ -164,6 +169,263 @@ canvas {
     border: 1px solid black;
   }
   
+
+  .content{
+    margin-bottom: 20px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 20px;
+  
+}
+
+.custom-container{
+    padding: 10px;
+    margin-top: 50px;
+}
+.main-card-reading{
+    position: relative;
+}
+
+
+
+.contentTotal{
+    border-left: 5px solid #FF952D;
+}
+.contentHit{
+    border-left: 5px solid #E94F99;
+}
+.contentOverlap{
+    border-left: 5px solid #2195F2;
+}
+.contentUntouched{
+    border-left: 5px solid #6F6AF8;
+}
+
+
+
+
+.Area{
+    font-size: 20px;
+    color: #333333;
+
+}
+.Total{
+    color: #FF952D;
+    font-size: 20px;
+}
+.sq{
+    color: #BBBBBB;
+}
+.TotalAreaimg{
+    width: 65px;
+   
+}
+
+.img-float{
+    margin-top: 20px;
+    position: absolute;
+    top: 15px;
+    right: 0;
+}
+
+
+.HitAreaimg{
+    width: 65px;
+    margin-top: 20px;
+}
+.Hit{
+    color: #E94F99;
+    font-size: 20px;
+}
+.OverlapAreaimg{
+    width: 65px;
+    margin-top: 20px;
+}
+.Overlap{
+    color: #2195F2;
+    font-size: 20px;
+}
+.UntouchedAreaimg{
+    width: 65px;
+    margin-top: 20px;
+}
+.Untouched{
+    color: #6F6AF8;
+    font-size: 20px;
+}
+
+.WineRackView{
+    margin-bottom: 20px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 20px;
+}
+.wine{
+    font-size: 20px;
+    color: #333333;
+}
+.nowells{
+    font-size: 14px;
+    color: #131313;
+    margin-left: 50%;
+}
+.wineimg{
+    width: 400px;
+    margin-top:30px;
+    margin-left: 70px;
+    margin-bottom: 30px;
+
+}
+
+.card {
+   
+    padding: 15px;
+ 
+   margin-top: 8px;
+  }
+ .Fracp{
+    font-size: 14px;
+    color: #131313;
+    margin-bottom: 0px;
+ }
+ .FracArea{
+    font-size: 12px;
+    color: #131313;
+    margin-bottom: 0px;
+ }
+
+ .Frac{
+    color: #53989C;
+ }
+ .Frac4{
+    color: #7F83EB;
+ }
+ .Frac6{
+    color: #B14BDA;
+ }
+ .Frac3{
+    color: #2F43AA; 
+}
+ .Frac5{
+    color: #2CA3DA; 
+}
+ .Frac7{
+    color: #FF5C44;
+ }
+
+ .circle-wrap {
+    margin: 30px auto;
+    width: 150px;
+    height: 150px;
+    background: #F5F5F5;
+    border-radius: 50%;
+    border: 1px solid #cdcbd0;
+  }
+
+  .circle-wrap .circle .mask,
+.circle-wrap .circle .fill {
+  width: 150px;
+  height: 150px;
+  position: absolute;
+  border-radius: 50%;
+}
+
+.mask .fill {
+  clip: rect(0px, 75px, 150px, 0px);
+  background-color: #2195F2;
+}
+
+.mask .fill1 {
+  clip: rect(0px, 75px, 150px, 0px);
+  background-color: #E94F99;
+}
+.mask .fill2 {
+  clip: rect(0px, 75px, 150px, 0px);
+  background-color: #6F6AF8;
+}
+
+  .ovwelap{
+    text-align: center;
+    margin-bottom: 35px;
+  }
+.circle-wrap .circle .mask {
+    clip: rect(0px, 150px, 150px, 75px);
+  }
+  
+  .mask.full,
+  .circle .fill {
+    animation: fill ease-in-out 3s;
+    transform: rotate(135deg);
+  }
+
+ 
+  
+  @keyframes fill{
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(135deg);
+    }
+  }
+   
+   .inside-circle {
+    width: 122px;
+    height: 122px;
+    border-radius: 50%;
+    background:white;
+    line-height: 120px;
+    text-align: center;
+    margin-top: 14px;
+    margin-left: 14px;
+    /* color: #1e51dc; */
+    position: absolute;
+    z-index: 100;
+    font-weight: 700;
+    font-size: 2em;
+    border: 1px solid #cdcbd0;
+  }
+
+.fracicon2{
+  color: #53989C;
+  font-size: 10px;
+}
+.fracicon4{
+  color: #7F83EB;
+  font-size: 10px;
+}
+.fracicon6{
+  color: #B14BDA;
+  font-size: 10px;
+}
+.fracicon3{
+  color: #2F43AA;
+  font-size: 10px;
+}
+.fracicon5{
+  color: #2CA3DA;
+  font-size: 10px;
+}
+.fracicon7{
+  color: #FF5C44;
+  font-size: 10px;
+}
+
+
+  @media only screen and (min-width: 320px) and (max-width: 767px)  {
+    .content {
+  
+        width: 300px;
+    }
+    .wineimg {
+        width: 200px;
+     
+    }
+    .WineRackView {
+      
+        width: 350px;
+    }
+  }
 
 @media screen and (min-width: 768px) {
     body {
