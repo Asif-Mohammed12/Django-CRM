@@ -1,8 +1,10 @@
+{% load static %}
 <body id="body-pd">
   <header class="header" id="header">
     <div class="header_toggle">
       <i class="bx bx-menu" id="header-toggle"></i>
     </div>
+    <img src={% static 'images/Logo-Smaller-text-darker-cia.png' %} alt="" />
     <h6> Hello, {{request.user}} </h6>
     <div class="header_img">
       <img src="https://i.imgur.com/hczKIze.jpg" alt="" />
@@ -12,8 +14,7 @@
     <nav class="nav">
       <div>
         <a href="#" class="nav_logo">
-          <i class="bx bx-layer nav_logo-icon"></i>
-          
+          <img src=" {% static 'images/logo.png' %}" alt="" />
         </a>
         <div class="nav_list">
           <a href = "{% url 'home' %}" class="nav_link active">
