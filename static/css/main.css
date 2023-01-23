@@ -235,7 +235,7 @@ canvas {
     margin-top: 20px;
     position: absolute;
     top: 15px;
-    right: 5px;
+    right:  5px;
 }
 
 .HitAreaimg{
@@ -451,10 +451,10 @@ canvas {
         padding: 1rem 1rem 0 0;
     }
     .show {
-        width: calc(var(--nav-width) + 156px);
+        width: calc(var(--nav-width) + 100px);  
     }
     .body-pd {
-        padding-left: calc(var(--nav-width) + 188px);
+        padding-left: calc(var(--nav-width) + 125px);
     }
 }
 
