@@ -979,9 +979,13 @@
      untouchedCanvasArea = canvasArea;
      untouchedCanvasAreaPercentage = 100;
      var circleAreaCovered = 0;
+     var oneCircleArea = 0;
+     var totalCircleArea = 0;
      for (let i = 0; i < circles.length; i++) {
        let circleExist = circles[i];
        circleAreaCovered += circleExist.area;
+       totalCircleArea += circleExist.area;
+       oneCircleArea = circleExist.area;
        //console.log("circleExist", circleExist.area);
      }
 
@@ -1035,10 +1039,11 @@
      }
      hitAreaPercentage = getPercentage(circleAreaCovered, canvasArea).toFixed(2);
 
-     hitAreaOnce = circleAreaCovered - overlapArea;
-     hitAreaOncePercentage = getPercentage(hitAreaOnce, circleAreaCovered).toFixed(2);
+     hitAreaOnce = totalCircleArea - overlapArea;
+     var hitAreaOnceDisplayPercent = totalCircleArea - overlapArea;
+     hitAreaOncePercentage = getPercentage(hitAreaOnce, totalCircleArea).toFixed(2);
 
-     overlapAreaPercentage = getPercentage(overlapArea, circleAreaCovered).toFixed(2);;
+     overlapAreaPercentage = getPercentage(overlapArea, totalCircleArea).toFixed(2);
      // console.log("Hit Area: ", circleAreaCovered);
      if (circleAreaCovered > 0) {
        untouchedCanvasAreaPercentage -= getPercentage(
@@ -1048,27 +1053,27 @@
        untouchedCanvasArea -= circleAreaCovered;
      }
 
-     console.log("test: ", new Intl.NumberFormat('en-US').format(canvasArea));
 
      //console.log("Overlap Area: ", overlapArea);
 
      //console.log("Untouched Area: ", untouchedCanvasArea);
      //console.log("Untouched Area Percentage: ", untouchedCanvasAreaPercentage);
-     //console.log("Radius: ", R*10);
+     console.log("Radius: ", R*10);
      $(".radius-dynamic" ).html(new Intl.NumberFormat('en-US').format(R*10));
-    // console.log("Total Area: ", canvasArea * 100);
-    // console.log("Hit All Area: ", (circleAreaCovered * 100).toFixed(0));
+    console.log("Total Area: ", canvasArea * 100);
+    console.log("One Circle Area: ", oneCircleArea * 100);
+     console.log("Hit All Area: ", (circleAreaCovered * 100).toFixed(0));
      console.log("Hit All Area Percentage: ", hitAreaPercentage);
-    // console.log("Hit Once Area: ", (hitAreaOnce * 100).toFixed(0));
+     console.log("Hit Once Area: ", (hitAreaOnce * 100).toFixed(0));
      console.log("Hit Once Area Percentage: ", hitAreaOncePercentage);
-    // console.log("Overlap Area: ", overlapArea.toFixed(2)  * 100);
+     console.log("Overlap Area: ", overlapArea.toFixed(2)  * 100);
      console.log("Overlap Area Percentage: ", overlapAreaPercentage);
-     //console.log("Untouched Area: ", (untouchedCanvasArea* 100).toFixed(0) );
+     console.log("Untouched Area: ", (untouchedCanvasArea* 100).toFixed(0) );
      console.log("Untouched Area Percentage: ", untouchedCanvasAreaPercentage);
 
      $(".lbl-total-area" ).html(new Intl.NumberFormat('en-US').format(canvasArea * 100));
      $(".lbl-hit-area" ).html(new Intl.NumberFormat('en-US').format((circleAreaCovered * 100).toFixed(0)));
-     $(".lbl-hit-once" ).html(new Intl.NumberFormat('en-US').format((hitAreaOnce * 100).toFixed(0)));
+     $(".lbl-hit-once" ).html(new Intl.NumberFormat('en-US').format((hitAreaOnceDisplayPercent * 100).toFixed(0)));
      $(".lbl-overlap-area" ).html(new Intl.NumberFormat('en-US').format((overlapArea * 100).toFixed(0))) ;
      $(".lbl-untouched-area" ).html(new Intl.NumberFormat('en-US').format((untouchedCanvasArea* 100).toFixed(0)) );
 
