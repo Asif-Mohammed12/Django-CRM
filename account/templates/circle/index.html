@@ -1,6 +1,4 @@
-{% extends 'account/main.html' %} 
-{% block content %} 
-{% load static %}
+{% extends 'account/main.html' %} {% block content %} {% load static %}
 <link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.11.0.css" />
 <script src="http://code.jquery.com/qunit/qunit-1.11.0.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -28,7 +26,7 @@
   .dot-total {
     height: 12px;
     width: 12px;
-    background-color: #2595F0;
+    background-color: #2595f0;
     border-radius: 50%;
   }
 
@@ -636,9 +634,8 @@
       return { x: x1, y: y1, height: y2 - y1, width: x2 - x1 };
     };
   })((window.circleIntersection = window.circleIntersection || {}));
-
 </script>
-{% comment %} End  circle intersection Library  {% endcomment %}
+{% comment %} End circle intersection Library {% endcomment %}
 <script>
    // This function stores the details for a single circle.
    function Circle(id, x, y, radius, color, area, row) {
@@ -1105,7 +1102,7 @@
         };
         hitareaoncecircle.animationTo(options);
       });
-      
+
       overlap.forEach((el, index) => {
         const options = {
           index: index + 1,
@@ -1353,86 +1350,110 @@
       <div class="col-md-9 custom-card">
         <div class="container">
           <p class="canvas-axis mt-5">Wine Rack View</p>
-          <p class="" style="float: right;font-family: 'Lato';
-          font-style: normal;
-          font-weight: 600;
-          font-size: 14px;
-          line-height: 17px;">No of Wells : 6</p>
+          <p
+            class=""
+            style="
+              float: right;
+              font-family: 'Lato';
+              font-style: normal;
+              font-weight: 600;
+              font-size: 14px;
+              line-height: 17px;
+            "
+          >
+            No of Wells : 6
+          </p>
           <div class="d-flex justify-content-center mt-5 mb-5">
-             <fieldset style="position:relative;width:106px">
-              <legend style="
-              position: absolute;
-              font-family: 'Lato';
-              font-style: normal;
-              font-weight: 400;
-              font-size: 12px;
-              line-height: 14px;
-              left: 70px;
-              ">
-              7000’
-            </legend>
-            <legend style="
-            position: absolute;
-            font-family: 'Lato';
-            font-style: normal;
-            font-weight: 400;
-            font-size: 12px;
-            line-height: 14px;
-            left: 70px;
-            top: 255px;
-            ">
-            9640’
-          </legend>
-          <legend style="
-            position: absolute;
-            font-family: 'Lato';
-            font-style: normal;
-            font-weight: 400;
-            font-size: 12px;
-            line-height: 14px;
-            left: 607px;
-            top: 268px;
-            ">
-            5280’
-          </legend>
-              <legend style="position: absolute;
-              top: 90px;
-              max-height: 40ch;
-              writing-mode: vertical-rl;
-              transform: rotate(180deg);
-              text-align: center;
-              font-family: 'Lato';
-              font-style: normal;
-              font-weight: 600;
-              font-size: 14px;
-              color: #131313;
-              left: 80px;
-              width:0px;
-              ">Depth in Feet​:</legend>
-              <legend style="position: absolute;
-              top: 268px;
-              width: 100%;
-              text-align: center;
-              font-family: 'Lato';
-              font-style: normal;
-              font-weight: 600;
-              font-size: 14px;
-              color: #131313;
-              left: 310px;"
-             >Distance in Feet​</legend>
-             </fieldset>
+            <fieldset style="position: relative; width: 106px">
+              <legend
+                style="
+                  position: absolute;
+                  font-family: 'Lato';
+                  font-style: normal;
+                  font-weight: 400;
+                  font-size: 12px;
+                  line-height: 14px;
+                  left: 70px;
+                "
+              >
+                7000’
+              </legend>
+              <legend
+                style="
+                  position: absolute;
+                  font-family: 'Lato';
+                  font-style: normal;
+                  font-weight: 400;
+                  font-size: 12px;
+                  line-height: 14px;
+                  left: 70px;
+                  top: 255px;
+                "
+              >
+                9640’
+              </legend>
+              <legend
+                style="
+                  position: absolute;
+                  font-family: 'Lato';
+                  font-style: normal;
+                  font-weight: 400;
+                  font-size: 12px;
+                  line-height: 14px;
+                  left: 607px;
+                  top: 268px;
+                "
+              >
+                5280’
+              </legend>
+              <legend
+                style="
+                  position: absolute;
+                  top: 90px;
+                  max-height: 40ch;
+                  writing-mode: vertical-rl;
+                  transform: rotate(180deg);
+                  text-align: center;
+                  font-family: 'Lato';
+                  font-style: normal;
+                  font-weight: 600;
+                  font-size: 14px;
+                  color: #131313;
+                  left: 80px;
+                  width: 0px;
+                "
+              >
+                Depth in Feet​:
+              </legend>
+              <legend
+                style="
+                  position: absolute;
+                  top: 268px;
+                  width: 100%;
+                  text-align: center;
+                  font-family: 'Lato';
+                  font-style: normal;
+                  font-weight: 600;
+                  font-size: 14px;
+                  color: #131313;
+                  left: 310px;
+                "
+              >
+                Distance in Feet​
+              </legend>
+            </fieldset>
             <canvas id="canvas" width="528" height="264" class></canvas>
-           
           </div>
         </div>
       </div>
       <div class="col-md-3 animation-class">
         <div class="card">
-          <p class="heading-circles text-center mt-5">
-            Wells Land Utilization
-          </p>
+          <p class="heading-circles text-center mt-5">Wells Land Utilization</p>
           <div class="row mx-3 mb-5">
-            <section class="list-name col-sm-6" style="justify-content: center;display: grid;">
+            <section
+              class="list-name col-sm-6"
+              style="justify-content: center; display: grid"
+            >
               <div
                 class="untouched inner"
                 data-pie='{ "percent": 0, "fontWeight": 100 }'
@@ -1442,8 +1463,10 @@
                 <p class="FracArea mx-1">UNTOUCHED</p>
               </div>
             </section>
-             <section class="list-name col-sm-6" style="justify-content: center;display: grid;">
-             
+            <section
+              class="list-name col-sm-6"
+              style="justify-content: center; display: grid"
+            >
               <div class="hit" data-pie='{ "percent": 0}'></div>
 
               <div class="flex mt-2 mx-3">
@@ -1451,24 +1474,30 @@
                 <p class="FracArea mx-1">HIT ALL</p>
               </div>
             </section>
-             <section class="list-name col-sm-6" style="justify-content: center;display: grid;">
+            <section
+              class="list-name col-sm-6"
+              style="justify-content: center; display: grid"
+            >
               <div
-              class="hitareaonce"
-              data-pie='{ "percent": 0, "fontWeight": 100 }'
-            ></div>
+                class="hitareaonce"
+                data-pie='{ "percent": 0, "fontWeight": 100 }'
+              ></div>
               <div class="flex mt-2 mx-3">
-                <span class="dot-hit mt-1"></span> 
+                <span class="dot-hit mt-1"></span>
                 <p class="FracArea mx-1">HIT ONCE</p>
               </div>
             </section>
-             <section class="list-name col-sm-6" style="justify-content: center;display: grid;">
+            <section
+              class="list-name col-sm-6"
+              style="justify-content: center; display: grid"
+            >
               <div
                 class="overlap"
                 data-pie='{ "percent": 0,"fontWeight": 100 }'
               ></div>
               <div class="flex mt-2 mx-3">
                 <span class="dot-total mt-1"></span>
-             
+
                 <p class="FracArea mx-1">OVERLAP</p>
               </div>
             </section>
@@ -1477,7 +1506,6 @@
       </div>
     </div>
   </div>
-  {% include 'circle/eclipse.html' %} 
-  {% include 'circle/status.html' %} 
-  {% endblock content %}
+  {% include 'circle/eclipse.html' %} {% include 'circle/status.html' %} {%
+  endblock content %}
 </body>
