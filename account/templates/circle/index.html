@@ -225,6 +225,8 @@
     }
   }
 </style>
+{% comment %} Start circle intersection Library {% endcomment %}
+
 <script>
   (function (circleIntersection) {
     "use strict";
@@ -634,7 +636,9 @@
       return { x: x1, y: y1, height: y2 - y1, width: x2 - x1 };
     };
   })((window.circleIntersection = window.circleIntersection || {}));
+
 </script>
+{% comment %} End  circle intersection Library  {% endcomment %}
 <script>
    // This function stores the details for a single circle.
    function Circle(id, x, y, radius, color, area, row) {
