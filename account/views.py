@@ -1,5 +1,7 @@
+
 from django.shortcuts import render, redirect 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+
 from django.forms import inlineformset_factory
 from django.contrib.auth.forms import UserCreationForm
 
@@ -10,11 +12,17 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 
+from django.views.decorators.csrf import csrf_exempt
+
+
+
 # Create your views here.
 from .models import *
 from .forms import OrderForm, CreateUserForm
 from .filters import OrderFilter
 from .decorators import unauthenticated_user, allowed_users, admin_only
+from .models import AreaCirlce
+import json
 
 @unauthenticated_user
 def registerPage(request):
@@ -154,3 +162,17 @@ def deleteOrder(request, pk):
 def circlePage(request):
 	context = {}
 	return render(request, 'circle/index.html', context)
+
+
+
+# @csrf_exempt
+# def save_json(request):
+#     if request.method == 'POST':
+#         data = json.loads(request.body)
+#         # validate data
+#         # save data to the database
+#         model = AreaCirlce(radius=data['radius'], TotalArea=data['TotalArea'], OneCircleArea=data['OneCircleArea'], HitAllArea=data['HitAllArea'], HitAllAreaPercentage=data['HitAllAreaPercentage'])
+#         model.save()
+#         return JsonResponse({'status': 'success'})
+#     else:
+#         return JsonResponse({'status': 'error'})

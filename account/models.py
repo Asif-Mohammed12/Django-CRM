@@ -51,3 +51,20 @@ class Order(models.Model):
     status = models.CharField(max_length=200, null=True, choices=STATUS)
     def __str__(self):
         return self.product.name
+
+class AreaCirlce(models.Model):
+
+    radius =  models.IntegerField()
+    TotalArea =  models.IntegerField()
+    OneCircleArea =  models.IntegerField()
+    HitAllArea =  models.IntegerField()
+    HitAllAreaPercentage =  models.IntegerField()
+    HitOnceArea =  models.IntegerField()
+    HitOnceAreaPercentage =  models.IntegerField()
+    OverlapArea =  models.IntegerField()
+    OverlapAreaPercentage =  models.IntegerField()
+    UntouchedArea =  models.IntegerField()
+    UntouchedAreaPercentage =  models.IntegerField()
+    date_created = models.DateTimeField(auto_now_add=True, null=True)
+    def __str__(self):
+        return self.AreaCirlce.UntouchedArea

@@ -649,51 +649,74 @@
      this.row = row;
    }
 
-   // This array hold all the circles on the canvas.
-   let circles = [];
-   let idCounter = 0;
-   let canvas;
-   let context;
-   let canvasArea = 0;
+// This array hold all the circles on the canvas.
+let circles = [];
+let idCounter = 0;
+let canvas;
+let context;
+let canvasArea = 0;
+let untouchedCanvasArea = 0;
+let untouchedCanvasAreaPercentage = 100;
+let hitAreaPercentage = 0;
+let hitOnceAreaPercentage = 100;
+let overlapAreaPercentage = 0;
+let overlaps = []
+let overlapsNew = []
+var totalHitOnceArea = 0;
 
-   let untouchedCanvasArea = 0;
-   let untouchedCanvasAreaPercentage = 100;
-   let hitAreaPercentage = 100;
-   let overlapAreaPercentage = 0;
-   let overlaps = [];
+let multipleOverlapCircles = [];
+let multipleOverlapCirclesArea = 0;
 
-   let multipleOverlapCircles = [];
-   let multipleOverlapCirclesArea = 0;
+this.selectedCircle;
+var totalCircles = 0;
+var numberOfHorizontalCircles = 3;
+var numberOfVerticalCircles = 2;
+var numberOfSections = numberOfHorizontalCircles * numberOfVerticalCircles;
+var width = 528;
+var height = 264;
+var R = Math.sqrt(((width * height) / numberOfSections))/2
+var R = 30
 
-   this.selectedCircle;
+var circleArr = []
 
-   var numberOfHorizontalCircles = 3;
-   var numberOfVerticalCircles = 2;
-   var numberOfSections = numberOfHorizontalCircles * numberOfVerticalCircles;
-   var width = 528;
-   var height = 264;
-   var R = Math.sqrt(((width * height) / numberOfSections))/2;
-   var R = 30;
 
-   let untouched = null;
-   let hit = null;
-   let overlap = null;
-   let untouchedelements = null;
-   let untouchedcircle = null;
-   let hitelements = null;
-   let hitcircle = null;
-   let overlapelements = null;
-   let overlapcircle = null;
+let untouched = null;
+let hit = null;
+let overlap = null;
+let untouchedelements = null;
+let untouchedcircle = null;
+let hitelements = null;
+let hitcircle = null;
+let overlapelements = null;
+let overlapcircle = null;
 
-   var translatePos = {};
-   var scale = 1.0;
+var translatePos = {};
+var scale = 1.0;
 
 
    {% comment %} window.onload = function () {
      this.init();
    }; {% endcomment %}
+   function initCirclesArray(){
+      totalCircles = numberOfVerticalCircles * numberOfHorizontalCircles;
+      let rowNumber = 0;
+      
+      var rowSize = 0;
+      for(let k=0; k < numberOfVerticalCircles; k++){
+          var rowArray = []
+          
+          for(let i=0; i < numberOfHorizontalCircles; i++){
+              rowArray.push(rowSize+i+1);
+          }
 
-   function init() {
+          rowSize = numberOfHorizontalCircles;
+          circleArr[rowNumber] =  rowArray;  
+          rowNumber++;          
+      }
+  }
+  function init() {
+    initCirclesArray();
+
      canvas = document.getElementById("canvas");
 
      context = canvas.getContext("2d");
@@ -772,63 +795,55 @@
      }
    }
 
-   function addRandomCircle(RX, RY, R, i) {
-     idCounter += 1;
-     let radius = R;
-     let x = RX;
-     let y = RY;
+   
 
-     let color = "#E2E9FB";
-
-     let circle = new Circle(
-       idCounter,
-       x,
-       y,
-       radius,
-       color,
-       parseInt(radius * radius * 3.14, 10),
-       i + 1
-     );
-
-     for (let i = 0; i < circles.length; i++) {
-       let circleExist = circles[i];
-       if (
-         circleIntersect(
-           circleExist.x,
-           circleExist.y,
-           circleExist.radius,
-           circle.x,
-           circle.y,
-           circle.radius
-         )
-       ) {
-         if (circleExist.id > circle.id) {
-           overlaps[circle.id + "-" + circleExist.id] = intersectionArea(
-             circleExist.x,
-             circleExist.y,
-             circleExist.radius,
-             circle.x,
-             circle.y,
-             circle.radius
-           );
-         } else {
-           overlaps[circleExist.id + "-" + circle.id] = intersectionArea(
-             circleExist.x,
-             circleExist.y,
-             circleExist.radius,
-             circle.x,
-             circle.y,
-             circle.radius
-           );
-         }
-       }
-     }
-
-     circles.push(circle);
-     calculateUntouchedArea();
-
-     drawCircles();
-   }
+  function addRandomCircle(RX, RY, R, row) {
+    idCounter += 1;
+    let radius =  R;
+    let x = RX;
+    let y = RY;
+  
+    let color = "#E2E9FB";
+  
+    let circle = new Circle(idCounter, x, y, radius, color, parseInt(radius * radius * 3.14,10), row+1);
+    circles.push(circle);
+  
+    for(var row in circleArr){
+          for(var column in circleArr[row]){
+              for(var columnAgain in circleArr[row]){
+                  if(column != columnAgain){        
+                      var cirlceIndex = circleArr[row][column]-1;
+                      var cirlceIndexAgain = circleArr[row][columnAgain]-1;
+                      if(circles[cirlceIndex] && circles[cirlceIndexAgain]){
+                          var tempCircles = [circles[cirlceIndex], circles[cirlceIndexAgain]];
+                          if (isCircleIntersect(tempCircles)) {                            
+                              var intersectionCoverageArea = overlapMarginLossFunction(circleIntersection.intersectionArea(tempCircles), tempCircles);
+                              if(column > columnAgain){
+                                  overlaps[circleArr[row][columnAgain] + "-" + circleArr[row][column]] = intersectionCoverageArea;
+                                  overlapsNew[circleArr[row][columnAgain] + "-" + circleArr[row][column]] = circles[cirlceIndex].area - intersectionCoverageArea;
+                              }else{
+                                  overlaps[circleArr[row][column] + "-" + circleArr[row][columnAgain]] = intersectionCoverageArea;
+                                  overlapsNew[circleArr[row][column] + "-" + circleArr[row][columnAgain]] = circles[cirlceIndex].area - intersectionCoverageArea;
+                              }
+                          } else {
+                              if(column > columnAgain){
+                                  overlaps[circleArr[row][columnAgain] + "-" + circleArr[row][column]] = 0;
+                                  overlapsNew[circleArr[row][columnAgain] + "-" + circleArr[row][column]] = circles[cirlceIndex].area;
+                              }else{
+                                  overlaps[circleArr[row][column] + "-" + circleArr[row][columnAgain]] = 0;
+                                  overlapsNew[circleArr[row][column] + "-" + circleArr[row][columnAgain]] = circles[cirlceIndex].area;
+                              }
+                          }
+                      }
+                  }       
+              }                
+          }
+          
+      } 
+      
+    drawCircles();
+    calculateUntouchedArea();
+  }
 
    function clearCanvas() {
      circles = [];
@@ -896,189 +911,200 @@
      }
    }
 
-   function detactOverlap() {
-     //console.log("previousSelectedCircle", previousSelectedCircle)
+   function detactOverlap(){
+    //console.log("previousSelectedCircle", previousSelectedCircle)
+    
+      if (previousSelectedCircle && previousSelectedCircle.isSelected) {
+          
+          for(var row in circleArr){
+              for(var column in circleArr[row]){
+                  for(var columnAgain in circleArr[row]){
+                      if(column != columnAgain){        
+                          var cirlceIndex = circleArr[row][column]-1;
+                          var cirlceIndexAgain = circleArr[row][columnAgain]-1;
+                          var tempCircles = [circles[cirlceIndex], circles[cirlceIndexAgain]];
+                          var isIntersect = isCircleIntersect(tempCircles);
+                        
+                          if (isIntersect) {                            
+                              var intersectionCoverageArea = overlapMarginLossFunction(circleIntersection.intersectionArea(tempCircles), tempCircles);
+                              if(column > columnAgain){
+                                  overlaps[circleArr[row][columnAgain] + "-" + circleArr[row][column]] = intersectionCoverageArea;
+                                  overlapsNew[circleArr[row][columnAgain] + "-" + circleArr[row][column]] = circles[cirlceIndex].area - intersectionCoverageArea;
+                              }else{
+                                  overlaps[circleArr[row][column] + "-" + circleArr[row][columnAgain]] = intersectionCoverageArea;
+                                  overlapsNew[circleArr[row][column] + "-" + circleArr[row][columnAgain]] = circles[cirlceIndex].area - intersectionCoverageArea;
+                              }
 
-     if (previousSelectedCircle && previousSelectedCircle.isSelected) {
-       for (let i = 0; i < circles.length; i++) {
-         if (previousSelectedCircle.id == circles[i].id) {
-           // let circle = circles[i];
-           // context.globalAlpha = 0.85;
-           // context.beginPath();
-           // context.arc(circle.x, circle.y, circle.radius, 0, Math.PI*2);
-           // context.fillStyle = circle.color;
-           // context.strokeStyle = "red";
-           // context.fill();
-           // context.stroke();
-         } else {
-           let circle = circles[i];
-           // context.globalAlpha = 0.85;
-           // context.beginPath();
-           // context.arc(circle.x, circle.y, circle.radius, 0, Math.PI*2);
-           // context.fillStyle = circle.color;
-
-           if (
-             circleIntersect(
-               previousSelectedCircle.x,
-               previousSelectedCircle.y,
-               previousSelectedCircle.radius,
-               circle.x,
-               circle.y,
-               circle.radius
-             )
-           ) {
-             // context.strokeStyle = "red";
-             // console.log("overlapping")
-             // context.moveTo( previousSelectedCircle.x + previousSelectedCircle.radius, previousSelectedCircle.y );
-             // context.arc(previousSelectedCircle.x, previousSelectedCircle.y, previousSelectedCircle.radius, 0, Math.PI*2);
-             // context.fillStyle = previousSelectedCircle.color;
-             // context.strokeStyle = "red";
-
-             //console.log(previousSelectedCircle.id + "-" +   circle.id, intersectionArea(previousSelectedCircle.x, previousSelectedCircle.y, previousSelectedCircle.radius, circle.x, circle.y, circle.radius))
-             //console.log(previousSelectedCircle.id + "-" +   circle.id, getPercentage(intersectionArea(previousSelectedCircle.x, previousSelectedCircle.y, previousSelectedCircle.radius, circle.x, circle.y, circle.radius), circle.area))
-
-             if (previousSelectedCircle.id > circle.id) {
-               overlaps[circle.id + "-" + previousSelectedCircle.id] =
-                 intersectionArea(
-                   previousSelectedCircle.x,
-                   previousSelectedCircle.y,
-                   previousSelectedCircle.radius,
-                   circle.x,
-                   circle.y,
-                   circle.radius
-                 );
-             } else {
-               overlaps[previousSelectedCircle.id + "-" + circle.id] =
-                 intersectionArea(
-                   previousSelectedCircle.x,
-                   previousSelectedCircle.y,
-                   previousSelectedCircle.radius,
-                   circle.x,
-                   circle.y,
-                   circle.radius
-                 );
-             }
-             context.strokeStyle = "red";
-             calculateUntouchedArea(previousSelectedCircle);
-           } else {
-             if (previousSelectedCircle.id > circle.id) {
-               overlaps[circle.id + "-" + previousSelectedCircle.id] = 0;
-             } else {
-               overlaps[previousSelectedCircle.id + "-" + circle.id] = 0;
-             }
-             calculateUntouchedArea(previousSelectedCircle);
-             //context.strokeStyle = "black";
-           }
-           // context.fill();
-           // context.stroke();
-         }
-       }
-     }
-   }
+                          } else {
+                              if(column > columnAgain){
+                                  overlaps[circleArr[row][columnAgain] + "-" + circleArr[row][column]] = 0;
+                                  overlapsNew[circleArr[row][columnAgain] + "-" + circleArr[row][column]] = circles[cirlceIndex].area;
+                              }else{
+                                  overlaps[circleArr[row][column] + "-" + circleArr[row][columnAgain]] = 0;
+                                  overlapsNew[circleArr[row][column] + "-" + circleArr[row][columnAgain]] = circles[cirlceIndex].area;
+                              }
+                          }
+                          
+                          calculateUntouchedArea(previousSelectedCircle);
+                      }       
+                  }                
+              }
+              
+          }
+      }
+  }
 
    function calculateUntouchedArea(previousSelectedCircle) {
-     untouchedCanvasArea = canvasArea;
-     untouchedCanvasAreaPercentage = 100;
-     var circleAreaCovered = 0;
-     var oneCircleArea = 0;
-     var totalCircleArea = 0;
-     for (let i = 0; i < circles.length; i++) {
-       let circleExist = circles[i];
-       circleAreaCovered += circleExist.area;
-       totalCircleArea += circleExist.area;
-       oneCircleArea = circleExist.area;
-       //console.log("circleExist", circleExist.area);
-     }
+    untouchedCanvasArea = canvasArea;
+    untouchedCanvasAreaPercentage = 100;
+    var circleAreaCovered = 0;
+    var totalCircleArea = 0;
+    var totalOverlapArea = 0;
+    let intersectionArea = 0;
+    for(let i=0; i<circles.length; i++) {
+        let circleExist = circles[i];
+        circleAreaCovered += circleExist.area
+    }
+    totalCircleArea = circleAreaCovered;
 
-     let overlapArea = 0;
-     for (var key in overlaps) {
-       overlapArea += overlaps[key];
-     }
+    let overlapArea = 0;
+    for (var key in overlaps) {
+        overlapArea += overlaps[key];
+    }
 
-     //console.log("Hit Area without Overlap: ", circleAreaCovered);
+    let nonOverlapArea = 0;
+    for (var key in overlapsNew) {
+        nonOverlapArea += overlapsNew[key];
+    }
+   
+    if(overlapArea > 0){
+        circleAreaCovered -=  overlapArea;
+    }
+    
+    var rowsOverlapAreas = []; 
 
-     if (overlapArea > 0) {
-       //console.log("overlaps", overlaps);
-       circleAreaCovered -= overlapArea;
-     }
+    if(circles.length == totalCircles){
+        rowsOverlapAreas = []; 
+        for(var row in circleArr){
+            var rowCircles = []
+            for(var column in circleArr[row]){
+                var cicleIndex = circleArr[row][column]-1;
+                rowCircles.push(circles[cicleIndex])
+            }
+            var rowOverlapArea = 0;
+            rowCircles = rowCircles.sort(() => Math.random() - 0.5)
+            rowOverlapArea = overlapMarginLossFunction(circleIntersection.intersectionArea(rowCircles), rowCircles);
+            
+            if(rowOverlapArea > 0){
+                rowsOverlapAreas.push(rowOverlapArea);
+            }
+        }
+    }
 
-     let circlesNew = [];
-     let ii = 0;
+   
+    let circleOverlapAdjustment = 0;
+    for(var eachRowOverlap in rowsOverlapAreas){
+        circleOverlapAdjustment +=  rowsOverlapAreas[eachRowOverlap];
+    }
+    if(circleOverlapAdjustment > 0){
+        circleAreaCovered += circleOverlapAdjustment;
+        
+        totalOverlapArea += overlapArea;
+        
+    } else {
+        totalHitOnceArea = nonOverlapArea - overlapArea;
+        totalOverlapArea += overlapArea * 2;
+    }
 
-     for (let k = 0; k < numberOfVerticalCircles; k++) {
-       let rowNumber = k + 1;
-       if (multipleOverlapCircles.length == 0) {
-         multipleOverlapCircles[k] = 0;
-       }
-       for (let i = 0; i < circles.length; i++) {
-         if (
-           previousSelectedCircle &&
-           previousSelectedCircle.isSelected &&
-           previousSelectedCircle.row == rowNumber &&
-           circles[i].row == rowNumber
-         ) {
-           circlesNew[ii] = circles[i];
-           ii++;
-           multipleOverlapCircles[k] =
-             circleIntersection.intersectionArea(circlesNew);
-         }
-       }
-     }
+    
+    
+    hitOnceAreaPercentage = getPercentage(totalHitOnceArea - circleOverlapAdjustment, totalCircleArea).toFixed(2);
+    
+    hitAreaPercentage = getPercentage(circleAreaCovered, canvasArea).toFixed(2);
 
-     //console.log("Overlap Area Adjustment: ", multipleOverlapCircles);
-
-     let circleOverlapAdjustment = 0;
-     if (multipleOverlapCircles.length > 0) {
-       for (let k = 0; k < multipleOverlapCircles.length; k++) {
-         circleOverlapAdjustment += multipleOverlapCircles[k];
-       }
-     }
-
-     if (circleOverlapAdjustment > 0) {
-       circleAreaCovered += circleOverlapAdjustment;
-       // console.log("Overlap Area Total Adjustment: ", circleOverlapAdjustment);
-     }
-     hitAreaPercentage = getPercentage(circleAreaCovered, canvasArea).toFixed(2);
-
-     hitAreaOnce = totalCircleArea - overlapArea;
-     var hitAreaOnceDisplayPercent = totalCircleArea - overlapArea;
-     hitAreaOncePercentage = getPercentage(hitAreaOnce, totalCircleArea).toFixed(2);
-
-     overlapAreaPercentage = getPercentage(overlapArea, totalCircleArea).toFixed(2);
-     // console.log("Hit Area: ", circleAreaCovered);
-     if (circleAreaCovered > 0) {
-       untouchedCanvasAreaPercentage -= getPercentage(
-         circleAreaCovered,
-         untouchedCanvasArea
-       );
-       untouchedCanvasArea -= circleAreaCovered;
-     }
-
+    overlapAreaPercentage = getPercentage((totalCircleArea - (totalHitOnceArea - circleOverlapAdjustment)), totalCircleArea).toFixed(2);
+    
+    if(circleAreaCovered > 0){
+        untouchedCanvasAreaPercentage -= getPercentage(circleAreaCovered, untouchedCanvasArea).toFixed(2);
+        untouchedCanvasArea -= circleAreaCovered;
+    }
 
      //console.log("Overlap Area: ", overlapArea);
 
      //console.log("Untouched Area: ", untouchedCanvasArea);
      //console.log("Untouched Area Percentage: ", untouchedCanvasAreaPercentage);
-     console.log("Radius: ", R*10);
-     $(".radius-dynamic" ).html(new Intl.NumberFormat('en-US').format(R*10));
-    console.log("Total Area: ", canvasArea * 100);
-    console.log("One Circle Area: ", oneCircleArea * 100);
-     console.log("Hit All Area: ", (circleAreaCovered * 100).toFixed(0));
-     console.log("Hit All Area Percentage: ", hitAreaPercentage);
-     console.log("Hit Once Area: ", (hitAreaOnce * 100).toFixed(0));
-     console.log("Hit Once Area Percentage: ", hitAreaOncePercentage);
-     console.log("Overlap Area: ", overlapArea.toFixed(2)  * 100);
-     console.log("Overlap Area Percentage: ", overlapAreaPercentage);
-     console.log("Untouched Area: ", (untouchedCanvasArea* 100).toFixed(0) );
-     console.log("Untouched Area Percentage: ", untouchedCanvasAreaPercentage);
+    console.log("Radius: ", R*10);
+    $(".radius-dynamic" ).html(new Intl.NumberFormat('en-US').format(R*10));
 
-     $(".lbl-total-area" ).html(new Intl.NumberFormat('en-US').format(canvasArea * 100));
-     $(".lbl-hit-area" ).html(new Intl.NumberFormat('en-US').format((circleAreaCovered * 100).toFixed(0)));
-     $(".lbl-hit-once" ).html(new Intl.NumberFormat('en-US').format((hitAreaOnceDisplayPercent * 100).toFixed(0)));
-     $(".lbl-overlap-area" ).html(new Intl.NumberFormat('en-US').format((overlapArea * 100).toFixed(0))) ;
-     $(".lbl-untouched-area" ).html(new Intl.NumberFormat('en-US').format((untouchedCanvasArea* 100).toFixed(0)) );
+    console.log("Overlaps: ", overlaps);
+    console.log("Overlaps New: ", (overlapsNew));
 
-     if(untouched != null){
+    console.log("Total Area: ", canvasArea);
+    console.log("Total Circle Area: ", (totalCircleArea).toFixed(2));
+
+    console.log("Hit All Area: ", circleAreaCovered.toFixed(2));
+    console.log("Hit All Area Percentage: ", hitAreaPercentage);
+
+    console.log("Hit Once Area: ", (totalHitOnceArea - circleOverlapAdjustment).toFixed(2));
+    console.log("Hit Once Area Percentage: ", (hitOnceAreaPercentage));
+   
+    console.log("Overlap Area: ", (totalCircleArea - (totalHitOnceArea - circleOverlapAdjustment)).toFixed(2));
+    console.log("Overlap Area Percentage: ", overlapAreaPercentage);
+    
+    console.log("Untouched Area: ", untouchedCanvasArea.toFixed(2));
+    console.log("Untouched Area Percentage: ", untouchedCanvasAreaPercentage.toFixed(2));
+
+    $(".lbl-total-area" ).html(new Intl.NumberFormat('en-US').format(canvasArea * 100));
+    $(".lbl-hit-area" ).html(new Intl.NumberFormat('en-US').format((circleAreaCovered * 100).toFixed(0)));
+    $(".lbl-hit-once" ).html(new Intl.NumberFormat('en-US').format(((totalHitOnceArea - circleOverlapAdjustment) * 100).toFixed(0)));
+    $(".lbl-overlap-area" ).html(new Intl.NumberFormat('en-US').format(((totalCircleArea - (totalHitOnceArea - circleOverlapAdjustment)) * 100).toFixed(0))) ;
+    $(".lbl-untouched-area" ).html(new Intl.NumberFormat('en-US').format((untouchedCanvasArea* 100).toFixed(0)) );
+
+    /* ASIF Code Start 
+    const radius =  R*10
+    const TotalArea =  canvasArea * 100
+    const OneCircleArea =  oneCircleArea * 100
+    const HitAllArea =  ((circleAreaCovered * 100).toFixed(0))
+    const HitAllAreaPercentage =  hitAreaPercentage
+    const HitOnceArea = (hitAreaOnce * 100).toFixed(0)
+    const HitOnceAreaPercentage = hitAreaOncePercentage
+    const OverlapArea = overlapArea.toFixed(2)  * 100
+    const OverlapAreaPercentage = overlapAreaPercentage
+    const UntouchedArea = (untouchedCanvasArea* 100).toFixed(0) 
+    const UntouchedAreaPercentage = untouchedCanvasAreaPercentage
+  
+
+
+    $.ajax({
+      url: "/",
+      type: "POST",
+      data: {
+        radius: radius,
+        TotalArea: TotalArea,
+        OneCircleArea: OneCircleArea,
+        HitAllArea: HitAllArea,
+        HitAllAreaPercentage: HitAllAreaPercentage,
+        HitOnceArea: HitOnceArea,
+        HitOnceAreaPercentage: HitOnceAreaPercentage,
+        OverlapArea: OverlapArea,
+        OverlapAreaPercentage: OverlapAreaPercentage,
+        UntouchedArea: UntouchedArea,
+        UntouchedAreaPercentage: UntouchedAreaPercentage,
+      },
+      contentType: "application/json",
+      dataType: "json",
+      success: function (data) {
+        console.log(data)
+      },
+      error: function (data) {
+        console.log("error:")
+      }
+  });
+
+    /* ASIF Code End */
+    console.log("Hit All Area Percentage: ------->", untouched);
+    if(untouched != null){
+      
       untouched.forEach((el, index) => {
          const options = {
            index: index + 1,
@@ -1098,7 +1124,7 @@
       hitareaonce.forEach((el, index) => {
         const options = {
           index: index + 1,
-          percent: hitAreaOncePercentage,
+          percent: hitOnceAreaPercentage,
         };
         hitareaoncecircle.animationTo(options);
       });
@@ -1112,17 +1138,29 @@
       });
 
      }
-
-
    }
 
-   function getPercentage(number, total) {
-     return (number / total) * 100;
-   }
+   function overlapMarginLossFunction(overlapArea, circles){
+      var leastCircleArea = circles[0].area;
+      for (var key in circles) {
+          if(circles[key].area < leastCircleArea)
+              leastCircleArea = circles[key].area;
+      }
 
-   function circleIntersect(x0, y0, r0, x1, y1, r1) {
-     return Math.hypot(x0 - x1, y0 - y1) <= r0 + r1;
-   }
+      if(leastCircleArea < overlapArea){
+          overlapArea = leastCircleArea;
+      }
+      return overlapArea;
+  }
+
+  function getPercentage(number, total){
+      return (number/total)*100
+  }
+
+  function isCircleIntersect(circlesArray) {
+      return overlapMarginLossFunction(circleIntersection.intersectionArea(circlesArray), circlesArray) > 0 ? true : false;
+  }
+
 
    let previousSelectedCircle;
 
@@ -1329,7 +1367,7 @@
     hitareaonce.forEach((el, index) => {
       const options = {
         index: index + 1,
-        percent: hitAreaOncePercentage,
+        percent: hitOnceAreaPercentage,
       };
       hitareaoncecircle.animationTo(options);
     });
@@ -1343,6 +1381,42 @@
     });
   // update circle when range change
    });
+
+{% comment %} Asif {% endcomment %}
+   /* 
+   function export2txt() {
+    const originalData = {
+      area: [{
+          totalArea:  canvasArea * 100,
+        },
+
+        {
+          HitAllAreaPercentage: hitAreaPercentage,
+        
+        },
+        {
+          HitOnceAreaPercentage: hitAreaOncePercentage,
+        
+        },
+        {
+          UntouchedArea: (untouchedCanvasArea* 100).toFixed(0),
+        },
+        {
+          UntouchedAreaPrectage: untouchedCanvasAreaPercentage,
+        }
+      ]
+    };
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(originalData, null, 2)], {
+      type: "text/plain"
+      }));
+      a.setAttribute("download", "data.txt");
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+  }
+  */
+   
 </script>
 <body>
   <div class="container mb-2" style="margin-top: 70px">
@@ -1350,6 +1424,8 @@
       <div class="col-md-9 custom-card">
         <div class="container">
           <p class="canvas-axis mt-5">Wine Rack View</p>
+  {% comment %} <button onclick="export2txt()">Export data to local txt file</button> {% endcomment %}
+
           <p
             class=""
             style="
@@ -1501,11 +1577,18 @@
                 <p class="FracArea mx-1">OVERLAP</p>
               </div>
             </section>
+            
           </div>
         </div>
       </div>
     </div>
+   
   </div>
-  {% include 'circle/eclipse.html' %} {% include 'circle/status.html' %} {%
-  endblock content %}
+  {% include 'circle/eclipse.html' %} 
+  {% include 'circle/status.html' %} 
+  {% endblock content %}
 </body>
+
+<script>
+
+</script>
