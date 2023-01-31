@@ -1,55 +1,55 @@
 {% load static %}
-
-<div class="custom-container custom-container-lr mt-1 mb-2 animation-class">
-  <div class="row">
-    <div class="col-sm">
-      <div class="content main-card-reading contentTotal">
+<div class="container mb-3 animation-class grid ">
+  <div class="row justify-content-center">
+    <div class="container col-sm-12 col-md-6 col-lg-3 col-xl-3 col-xxl mx-2 mx-sm-5 mx-md-2  mx-lg-2 my-2 contentTotal mobile-w90 min-w300">
+      <div class="content mt-2 mb-lg-0 main-card-reading content mt-2 Total ">
         <h6 class="Area mt-3">Total Area</h6>
         <p class="Total">
           <span class="lbl-total-area">0</span><span class="sq"> sq ft</span>
         </p>
-        <img src="{% static "images/total-area.png" %}" alt="about-img"
+        <img src="{% static "images/total-area.svg" %}" alt="about-img"
         class="TotalAreaimg img-float ">
       </div>
     </div>
-    <div class="col-sm">
-      <div class="content main-card-reading contentUntouched">
+    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3 col-xxl mx-2 mx-md-2  mx-lg-2 my-2 contentUntouched mobile-w90 min-w300">
+      <div class="content mt-2 mb-lg-0 main-card-reading content mt-2 Hit ">
+        <h6 class="Area mt-3">Total Simulated Area</h6>
+        <p class="Hit">
+          <span class="lbl-hit-area">0</span><span class="sq"> sq ft</span>
+        </p>
+        <img src="{% static "images/total-simulated-area.svg" %}" alt="about-img" class="
+        HitAreaimg img-float ">
+      </div>
+    </div>
+    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3 col-xxl mx-2 mx-md-2  mx-lg-2 my-2 contentHit mobile-w90 min-w300">
+      <div class="content mt-2 mb-lg-0 main-card-reading content mt-2  Untouched">
         <h6 class="Area mt-3">Untouched Area</h6>
         <p class="Untouched">
           <span class="lbl-untouched-area">0</span>
           <span class="sq"> sq ft</span>
         </p>
-        <img src="{% static "images/untochedArea.png" %}" alt="about-img"
+        <img src="{% static "images/untouched-area.svg" %}" alt="about-img"
         class="UntouchedAreaimg img-float ">
       </div>
     </div>
-    <div class="col-sm">
-      <div class="content main-card-reading contentHit">
-        <h6 class="Area mt-3">Hit Area All</h6>
-        <p class="Hit">
-          <span class="lbl-hit-area">0</span><span class="sq"> sq ft</span>
-        </p>
-        <img src="{% static "images/hit_venn.png" %}" alt="about-img" class="
-        HitAreaimg img-float ">
-      </div>
-    </div>
-    <div class="col-sm">
-      <div class="content main-card-reading contentHit">
+    
+    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3 col-xxl mx-2 mx-md-2  mx-lg-2 my-2 contentHitonce mobile-w90 min-w300">
+      <div class="content mt-2 mb-lg-0 main-card-reading content mt-2 Hitonce ">
         <h6 class="Area mt-3">Hit Area Once</h6>
         <p class="Hit">
           <span class="lbl-hit-once">0</span><span class="sq"> sq ft</span>
         </p>
-        <img src="{% static "images/hit_venn.png" %}" alt="about-img" class="
+        <img src="{% static "images/hit-area-once.svg" %}" alt="about-img" class="
         HitAreaimg img-float ">
       </div>
     </div>
-    <div class="col-sm">
-      <div class="content main-card-reading contentOverlap">
+    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3 col-xxl mx-2 mx-md-2  mx-lg-2 my-2 contentOverlap mobile-w90 min-w300">
+      <div class="content mt-2 mb-lg-0 main-card-reading content mt-2 Overlap">
         <h6 class="Area mt-3">Overlap Area</h6>
         <p class="Overlap">
           <span class="lbl-overlap-area">0</span> <span class="sq"> sq ft</span>
         </p>
-        <img src="{% static "images/overlap_venn.png" %}" alt="about-img"
+        <img src="{% static "images/overlap.svg" %}" alt="about-img"
         class=" OverlapAreaimg img-float ">
       </div>
     </div>

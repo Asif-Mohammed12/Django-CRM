@@ -12,36 +12,41 @@
   }
   canvas {
     cursor: pointer;
-    border: 1px solid #002060;
+    border: 1px solid black;
     background-color: #fff;
+    max-width: 528px;
+    max-height:264px;
+    width:100%;
   }
 
   .dot-overlap {
     height: 12px;
     width: 12px;
-    background-color: #2195f2;
+    background-color: #f38cac;
     border-radius: 50%;
   }
 
   .dot-total {
     height: 12px;
     width: 12px;
-    background-color: #2595f0;
+    background-color: #2195f2;
     border-radius: 50%;
   }
 
   .dot-hit {
     height: 12px;
     width: 12px;
-    background-color: #e94f99;
+    background-color: #6f6af8;
     border-radius: 50%;
   }
 
   .dot-untouched {
+    
+
     height: 12px;
-    width: 12px;
-    background-color: #6f6af8;
-    border-radius: 50%;
+width: 12px;
+background-color: #e94f99;
+border-radius: 50%;
   }
 
   .dot-even {
@@ -123,7 +128,7 @@
 
     /* identical to box height */
     display: flex;
-    align-items: center;
+    justify-content: end;
 
     color: #131313;
     float: right;
@@ -222,6 +227,63 @@
       transform: scale(1);
     }
   }
+
+
+  @media (min-width: 768px) and (max-width: 991.98px) { 
+    .y-axis-bottom{
+      position: absolute;
+      left: -38px;
+      top: 230px;
+    }
+    .x-axis-bottom {
+position: absolute;
+left: 10px;
+top: 268px;
+}
+
+
+.y-axis {
+
+position: absolute;
+left: 500px;
+top: 270px;
+}
+  .legend-title-down {
+position: absolute;
+top: 265px;
+left: 200px;
+}
+  
+}
+
+@media (max-width: 575.98px) { 
+.legend-title-down {
+   
+   position: absolute;
+   top: 120px;
+   left: 70px;
+ }
+
+ .x-axis-bottom{
+      position: absolute;
+      left: 0px;
+      top: 125px;
+    }
+
+    .y-axis-bottom{
+      position: absolute;
+      left: -38px;
+      top: 110px;
+    }
+     .y-axis {
+  
+
+    position: absolute;
+    left: 210px;
+    top: 125px;
+  }
+}
+
 </style>
 {% comment %} Start circle intersection Library {% endcomment %}
 
@@ -1300,7 +1362,7 @@ var scale = 1.0;
       speed: 30,
       animationSmooth: "1s ease-out",
       strokeBottom: 5,
-      colorSlice: "#6F6AF8",
+      colorSlice: "#E94F99",
       colorCircle: "#F0F5FB",
       round: true
     };
@@ -1312,7 +1374,7 @@ var scale = 1.0;
       speed: 30,
       animationSmooth: "1s ease-out",
       strokeBottom: 5,
-      colorSlice: "#E94F99",
+      colorSlice: " #6F6AF8",
       colorCircle: "#F0F5FB",
       round: true
     };
@@ -1324,7 +1386,7 @@ var scale = 1.0;
       speed: 30,
       animationSmooth: "1s ease-out",
       strokeBottom: 5,
-      colorSlice: "#E94F99",
+      colorSlice: "#F38CAC",
       colorCircle: "#F0F5FB",
       round: true
     };
@@ -1421,7 +1483,7 @@ var scale = 1.0;
 <body>
   <div class="container mb-2" style="margin-top: 70px">
     <div class="row">
-      <div class="col-md-9 custom-card">
+      <div class="col-sm-12 col-md-12 col-lg-8 col-xl-9 col-xxl-9 custom-card">
         <div class="container">
           <p class="canvas-axis mt-5">Wine Rack View</p>
   {% comment %} <button onclick="export2txt()">Export data to local txt file</button> {% endcomment %}
@@ -1432,7 +1494,7 @@ var scale = 1.0;
               float: right;
               font-family: 'Lato';
               font-style: normal;
-              font-weight: 600;
+              font-weight: 600; 
               font-size: 14px;
               line-height: 17px;
             "
@@ -1440,8 +1502,8 @@ var scale = 1.0;
             No of Wells : 6
           </p>
           <div class="d-flex justify-content-center mt-5 mb-5">
-            <fieldset style="position: relative; width: 106px">
-              <legend
+            <fieldset style="position: relative; width: 106px" class="d-none d-lg-block">
+              <legend 
                 style="
                   position: absolute;
                   font-family: 'Lato';
@@ -1522,7 +1584,7 @@ var scale = 1.0;
           </div>
         </div>
       </div>
-      <div class="col-md-3 animation-class">
+      <div class="col-sm-12 col-md-12 col-lg-4 col-xl-3 col-xxl-3 mt-4 mt-lg-0 animation-class ">
         <div class="card">
           <p class="heading-circles text-center mt-5">Wells Land Utilization</p>
           <div class="row mx-3 mb-5">
@@ -1530,24 +1592,11 @@ var scale = 1.0;
               class="list-name col-sm-6"
               style="justify-content: center; display: grid"
             >
-              <div
-                class="untouched inner"
-                data-pie='{ "percent": 0, "fontWeight": 100 }'
-              ></div>
-              <div class="flex mt-2">
-                <span class="dot-untouched mt-1"></span>
-                <p class="FracArea mx-1">UNTOUCHED</p>
-              </div>
-            </section>
-            <section
-              class="list-name col-sm-6"
-              style="justify-content: center; display: grid"
-            >
-              <div class="hit" data-pie='{ "percent": 0}'></div>
+              <div class="hit mx-3" data-pie='{ "percent": 0}'></div>
 
-              <div class="flex mt-2 mx-3">
+              <div class="flex mt-1">
                 <span class="dot-hit mt-1"></span>
-                <p class="FracArea mx-1">HIT ALL</p>
+                <p class="FracArea mx-1">Total Simulated Area</p>
               </div>
             </section>
             <section
@@ -1558,11 +1607,24 @@ var scale = 1.0;
                 class="hitareaonce"
                 data-pie='{ "percent": 0, "fontWeight": 100 }'
               ></div>
-              <div class="flex mt-2 mx-3">
-                <span class="dot-hit mt-1"></span>
-                <p class="FracArea mx-1">HIT ONCE</p>
+              <div class="flex mt-2">
+                <span class="dot-overlap mt-1"></span>
+                <p class="FracArea mx-1">Area Hit Once</p>
               </div>
             </section>
+            <section
+            class="list-name col-sm-6"
+            style="justify-content: center; display: grid"
+          >
+        <div
+          class="untouched inner"
+          data-pie='{ "percent": 0, "fontWeight": 100 }'
+        ></div>
+        <div class="flex mt-1 mx-2">
+          <span class="dot-untouched mt-1"></span>
+          <p class="FracArea mx-1">Untouched​</p>
+        </div>
+      </section>
             <section
               class="list-name col-sm-6"
               style="justify-content: center; display: grid"
@@ -1572,9 +1634,8 @@ var scale = 1.0;
                 data-pie='{ "percent": 0,"fontWeight": 100 }'
               ></div>
               <div class="flex mt-2 mx-3">
-                <span class="dot-total mt-1"></span>
-
-                <p class="FracArea mx-1">OVERLAP</p>
+                <span class="dot-total mt-1"></span>  
+                <p class="FracArea mx-1">Overlap</p>
               </div>
             </section>
             
